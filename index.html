@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Suoritukset 2026</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; }
+    .card { max-width: 520px; margin: 0 auto; padding: 16px; border: 1px solid #e5e5e5; border-radius: 16px; background: white; }
+    label { display: block; margin-top: 12px; font-size: 14px; color: #333; }
+    input, select, textarea, button {
+      width: 100%; box-sizing: border-box; margin-top: 6px;
+      padding: 12px; font-size: 16px; border-radius: 12px; border: 1px solid #ddd;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #4285f4; }
+    textarea { min-height: 84px; resize: vertical; }
+    button { margin-top: 14px; cursor: pointer; background: #4285f4; color: white; border: none; font-weight: 600; }
+    button:active { background: #3367d6; }
+    .status { margin-top: 12px; font-size: 14px; }
+    .status.error { color: #d93025; }
+    .status.success { color: #1e8e3e; }
+    .memeWrap { margin-top: 14px; display: none; padding: 16px; background: #fffbeb; border: 2px solid #fbbf24; border-radius: 16px; }
+    .memeWrap img { width: 100%; border-radius: 12px; margin-top: 8px; }
+    .memeTitle { font-size: 16px; font-weight: 600; }
+    #memeText { margin-top: 10px; font-size: 15px; line-height: 1.5; color: #333; }
+    .small { color: #666; font-size: 12px; margin-top: 6px; }
+    .secret-row { display: flex; gap: 10px; align-items: flex-end; }
+    .secret-row > div:first-child { flex: 1; }
+    .secret-saved { font-size: 11px; color: #1e8e3e; margin-top: 4px; }
+    
+    .user-select { display: flex; gap: 12px; margin-top: 8px; }
+    .user-select label {
+      flex: 1;
+      margin: 0;
+      padding: 14px 16px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .user-select input[type="radio"] {
+      display: none;
+    }
+    .user-select input[type="radio"]:checked + label {
+      border-color: #4285f4;
+      background: #e8f0fe;
+      color: #1a73e8;
+    }
+    .user-select label:active {
+      transform: scale(0.98);
+    }
+
+    .tag-select { 
+      display: grid; 
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 10px; 
+      margin-top: 8px; 
+    }
+    .tag-select label {
+      margin: 0;
+      padding: 12px 8px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tag-select input[type="radio"] {
+      display: none;
+    }
+    .tag-select input[type="radio"]:checked + label {
+      border-color: #34a853;
+      background: #e6f4ea;
+      color: #1e8e3e;
+    }
+    .tag-select label:active {
+      transform: scale(0.98);
+    }
+
+    .date-row { margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div style="font-size:18px; font-weight:600;">Suoritukset 2026</div>
+    <div class="small">Kirjaa suoritus. Yllätys osuu satunnaisesti!</div>
+
+    <form id="f">
+      <div class="secret-row">
+        <div>
+          <label>Salasana</label>
+          <input id="secret" type="password" placeholder="Syötä salasana" required />
+          <div id="secretSaved" class="secret-saved" style="display:none;">✓ Tallennettu</div>
+        </div>
+      </div>
+
+      <label>Käyttäjä</label>
+      <div class="user-select">
+        <input type="radio" id="userSmonde" name="user" value="Smonde" required />
+        <label for="userSmonde">Smonde</label>
+        <input type="radio" id="userLormy" name="user" value="Lörmy" />
+        <label for="userLormy">Lörmy</label>
+      </div>
+
+      <label>Laji</label>
+      <div class="tag-select">
+        <input type="radio" id="tagKuntosali" name="tag" value="Kuntosali" required />
+        <label for="tagKuntosali">🏋️ Kuntosali</label>
+        
+        <input type="radio" id="tagJuoksu" name="tag" value="Juoksu" />
+        <label for="tagJuoksu">🏃 Juoksu</label>
+        
+        <input type="radio" id="tagUinti" name="tag" value="Uinti" />
+        <label for="tagUinti">🏊 Uinti</label>
+        
+        <input type="radio" id="tagKuntopiiri" name="tag" value="Kuntopiiri" />
+        <label for="tagKuntopiiri">🔄 Kuntopiiri</label>
+        
+        <input type="radio" id="tagJooga" name="tag" value="Jooga" />
+        <label for="tagJooga">🧘 Jooga</label>
+        
+        <input type="radio" id="tagPyoraily" name="tag" value="Pyöräily" />
+        <label for="tagPyoraily">🚴 Pyöräily</label>
+      </div>
+
+      <div class="date-row">
+        <label>Päivä</label>
+        <input id="date" type="date" required />
+      </div>
+
+      <label>Lisähuomio (valinnainen)</label>
+      <textarea id="note" placeholder="Esim. 5 km / fiilis / aika..."></textarea>
+
+      <button type="submit">Tallenna</button>
+    </form>
+
+    <div id="status" class="status"></div>
+
+    <div id="memeWrap" class="memeWrap">
+      <div class="memeTitle">🎉 Yllätys!</div>
+      <div id="memeText"></div>
+      <img id="memeImg" alt="meme" style="display:none;" />
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzBi_b_aoB6QcdvxczEYUBHBAjiziHe3BRsECU5iu1ehBXL8ktwYN2dle7ZMqDYEdWq/exec";
+
+    console.log('🚀 Script loaded');
+
+    const f = document.getElementById('f');
+    const statusEl = document.getElementById('status');
+    const memeWrap = document.getElementById('memeWrap');
+    const memeImg = document.getElementById('memeImg');
+    const memeText = document.getElementById('memeText');
+    const secretInput = document.getElementById('secret');
+    const secretSaved = document.getElementById('secretSaved');
+
+    function setStatus(msg, type) {
+      console.log('📋 Status:', msg, type);
+      statusEl.textContent = msg;
+      statusEl.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function showSurprise(value) {
+      if (!value) return;
+      
+      // Tarkista onko URL (alkaa http) vai teksti
+      if (value.startsWith('http')) {
+        // Näytä kuvana
+        console.log('🖼️ Showing image:', value);
+        memeImg.src = value;
+        memeImg.style.display = 'block';
+        memeText.style.display = 'none';
+        memeText.textContent = '';
+      } else {
+        // Näytä tekstinä
+        console.log('📝 Showing text:', value);
+        memeText.textContent = value;
+        memeText.style.display = 'block';
+        memeImg.style.display = 'none';
+        memeImg.src = '';
+      }
+      
+      memeWrap.style.display = 'block';
+    }
+
+    function hideSurprise() {
+      memeWrap.style.display = 'none';
+      memeImg.src = '';
+      memeImg.style.display = 'none';
+      memeText.textContent = '';
+      memeText.style.display = 'none';
+    }
+
+    function loadSecret() {
+      const saved = localStorage.getItem('appSecret');
+      if (saved) {
+        secretInput.value = saved;
+        secretSaved.style.display = 'block';
+        console.log('🔑 Secret loaded from localStorage');
+      }
+    }
+
+    function saveSecret(secret) {
+      localStorage.setItem('appSecret', secret);
+      secretSaved.style.display = 'block';
+    }
+
+    function getSelectedUser() {
+      const selected = document.querySelector('input[name="user"]:checked');
+      return selected ? selected.value : '';
+    }
+
+    function getSelectedTag() {
+      const selected = document.querySelector('input[name="tag"]:checked');
+      return selected ? selected.value : '';
+    }
+
+    loadSecret();
+    document.getElementById('date').valueAsDate = new Date();
+
+    f.addEventListener('submit', async (ev) => {
+      console.log('📤 Form submit triggered');
+      ev.preventDefault();
+      hideSurprise();
+      setStatus('Tallennetaan...');
+
+      const secret = secretInput.value.trim();
+      const payload = {
+        secret: secret,
+        user: getSelectedUser(),
+        date: document.getElementById('date').value,
+        tag: getSelectedTag(),
+        note: document.getElementById('note').value.trim()
+      };
+
+      console.log('📦 Payload:', { ...payload, secret: '***' });
+
+      try {
+        console.log('🌐 Sending fetch...');
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+
+        console.log('📥 Response status:', res.status);
+        const json = await res.json();
+        console.log('📥 Response JSON:', json);
+        
+        if (!json.ok) {
+          if (json.error === 'Unauthorized') {
+            setStatus('Väärä salasana', 'error');
+            localStorage.removeItem('appSecret');
+            secretSaved.style.display = 'none';
+          } else {
+            setStatus('Virhe: ' + json.error, 'error');
+          }
+          return;
+        }
+
+        saveSecret(secret);
+
+        const saved = json.saved;
+        setStatus(`Tallennettu! Suorituksia: ${saved.countForUser}`, 'success');
+
+        // Näytä yllätys jos surpriseShown on true ja memeUrl ei ole tyhjä
+        if (saved.surpriseShown && saved.memeUrl) {
+          showSurprise(saved.memeUrl);
+        }
+
+        document.getElementById('note').value = '';
+
+      } catch (err) {
+        console.error('❌ Fetch error:', err);
+        setStatus('Verkkovirhe: ' + err.message, 'error');
+      }
+    });
+
+    console.log('✅ Event listener attached');
+  </script>
+</body>
+</html>
