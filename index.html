@@ -3,7 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#4285f4" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Treenit" />
   <title>Suoritukset 2026</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon-192.svg" />
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; }
     .card { max-width: 520px; margin: 0 auto; padding: 16px; border: 1px solid #e5e5e5; border-radius: 16px; background: white; }
@@ -83,6 +90,55 @@
     }
 
     .date-row { margin-top: 12px; }
+
+    /* Minutes section */
+    .minutes-section { margin-top: 16px; }
+    .minutes-display {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a73e8;
+      padding: 12px;
+      background: #e8f0fe;
+      border-radius: 12px;
+      margin: 8px 0 12px 0;
+    }
+    .minutes-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .minutes-buttons button {
+      margin: 0;
+      padding: 14px 8px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      width: 100%;
+    }
+    .minutes-buttons .btn-plus {
+      background: #34a853;
+      color: white;
+    }
+    .minutes-buttons .btn-plus:active {
+      background: #2d8f47;
+    }
+    .minutes-buttons .btn-minus {
+      background: #ea4335;
+      color: white;
+    }
+    .minutes-buttons .btn-minus:active {
+      background: #c5352a;
+    }
+    .minutes-reset {
+      margin-top: 8px;
+      background: #9aa0a6;
+      font-size: 14px;
+      padding: 10px;
+    }
+    .minutes-reset:active {
+      background: #80868b;
+    }
   </style>
 </head>
 <body>
@@ -133,6 +189,26 @@
         <input id="date" type="date" required />
       </div>
 
+      <!-- Minutes section -->
+      <div class="minutes-section">
+        <label>Kesto (min)</label>
+        <div id="minutesDisplay" class="minutes-display">0 min</div>
+        
+        <div class="minutes-buttons">
+          <button type="button" class="btn-plus" onclick="addMinutes(1)">+1</button>
+          <button type="button" class="btn-plus" onclick="addMinutes(5)">+5</button>
+          <button type="button" class="btn-plus" onclick="addMinutes(10)">+10</button>
+          <button type="button" class="btn-plus" onclick="addMinutes(15)">+15</button>
+        </div>
+        <div class="minutes-buttons" style="margin-top: 8px;">
+          <button type="button" class="btn-minus" onclick="addMinutes(-1)">−1</button>
+          <button type="button" class="btn-minus" onclick="addMinutes(-5)">−5</button>
+          <button type="button" class="btn-minus" onclick="addMinutes(-10)">−10</button>
+          <button type="button" class="btn-minus" onclick="addMinutes(-15)">−15</button>
+        </div>
+        <button type="button" class="minutes-reset" onclick="resetMinutes()">Nollaa</button>
+      </div>
+
       <label>Lisähuomio (valinnainen)</label>
       <textarea id="note" placeholder="Esim. 5 km / fiilis / aika..."></textarea>
 
@@ -151,7 +227,12 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzBi_b_aoB6QcdvxczEYUBHBAjiziHe3BRsECU5iu1ehBXL8ktwYN2dle7ZMqDYEdWq/exec";
 
-    console.log('🚀 Script loaded');
+    // Rekisteröi service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✅ Service Worker registered'))
+        .catch(err => console.log('Service Worker error:', err));
+    }
 
     const f = document.getElementById('f');
     const statusEl = document.getElementById('status');
@@ -160,9 +241,26 @@
     const memeText = document.getElementById('memeText');
     const secretInput = document.getElementById('secret');
     const secretSaved = document.getElementById('secretSaved');
+    const minutesDisplay = document.getElementById('minutesDisplay');
+
+    // Minuuttilaskuri
+    let currentMinutes = 0;
+
+    function updateMinutesDisplay() {
+      minutesDisplay.textContent = currentMinutes + ' min';
+    }
+
+    function addMinutes(amount) {
+      currentMinutes = Math.max(0, currentMinutes + amount);
+      updateMinutesDisplay();
+    }
+
+    function resetMinutes() {
+      currentMinutes = 0;
+      updateMinutesDisplay();
+    }
 
     function setStatus(msg, type) {
-      console.log('📋 Status:', msg, type);
       statusEl.textContent = msg;
       statusEl.className = 'status' + (type ? ' ' + type : '');
     }
@@ -170,17 +268,12 @@
     function showSurprise(value) {
       if (!value) return;
       
-      // Tarkista onko URL (alkaa http) vai teksti
       if (value.startsWith('http')) {
-        // Näytä kuvana
-        console.log('🖼️ Showing image:', value);
         memeImg.src = value;
         memeImg.style.display = 'block';
         memeText.style.display = 'none';
         memeText.textContent = '';
       } else {
-        // Näytä tekstinä
-        console.log('📝 Showing text:', value);
         memeText.textContent = value;
         memeText.style.display = 'block';
         memeImg.style.display = 'none';
@@ -203,7 +296,6 @@
       if (saved) {
         secretInput.value = saved;
         secretSaved.style.display = 'block';
-        console.log('🔑 Secret loaded from localStorage');
       }
     }
 
@@ -226,33 +318,30 @@
     document.getElementById('date').valueAsDate = new Date();
 
     f.addEventListener('submit', async (ev) => {
-      console.log('📤 Form submit triggered');
       ev.preventDefault();
       hideSurprise();
       setStatus('Tallennetaan...');
 
       const secret = secretInput.value.trim();
+      
+      // Payload sisältää minutes-kentän
       const payload = {
         secret: secret,
         user: getSelectedUser(),
         date: document.getElementById('date').value,
         tag: getSelectedTag(),
-        note: document.getElementById('note').value.trim()
+        note: document.getElementById('note').value.trim(),
+        minutes: currentMinutes  // <-- Minuutit lisätty tähän
       };
 
-      console.log('📦 Payload:', { ...payload, secret: '***' });
-
       try {
-        console.log('🌐 Sending fetch...');
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
 
-        console.log('📥 Response status:', res.status);
         const json = await res.json();
-        console.log('📥 Response JSON:', json);
         
         if (!json.ok) {
           if (json.error === 'Unauthorized') {
@@ -270,20 +359,18 @@
         const saved = json.saved;
         setStatus(`Tallennettu! Suorituksia: ${saved.countForUser}`, 'success');
 
-        // Näytä yllätys jos surpriseShown on true ja memeUrl ei ole tyhjä
         if (saved.surpriseShown && saved.memeUrl) {
           showSurprise(saved.memeUrl);
         }
 
+        // Nollaa kentät onnistuneen lähetyksen jälkeen
         document.getElementById('note').value = '';
+        resetMinutes();  // <-- Minuutit nollataan
 
       } catch (err) {
-        console.error('❌ Fetch error:', err);
         setStatus('Verkkovirhe: ' + err.message, 'error');
       }
     });
-
-    console.log('✅ Event listener attached');
   </script>
 </body>
 </html>
