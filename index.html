@@ -139,6 +139,73 @@
     .minutes-reset:active {
       background: #80868b;
     }
+
+    /* Stats section */
+    .stats-section {
+      margin-top: 16px;
+      padding: 16px;
+      background: #f0f4f9;
+      border-radius: 12px;
+      display: none;
+    }
+    .stats-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #1a73e8;
+    }
+    .stats-totals {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-box {
+      background: white;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      border: 1px solid #e0e0e0;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a73e8;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      margin-top: 4px;
+    }
+    .per-tag-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .per-tag-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .per-tag-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      border: 1px solid #e0e0e0;
+    }
+    .per-tag-name {
+      font-weight: 500;
+      color: #333;
+    }
+    .per-tag-stats {
+      color: #666;
+      font-size: 13px;
+    }
   </style>
 </head>
 <body>
@@ -217,10 +284,32 @@
 
     <div id="status" class="status"></div>
 
+    <!-- Surprise section -->
     <div id="memeWrap" class="memeWrap">
       <div class="memeTitle">🎉 Yllätys!</div>
       <div id="memeText"></div>
       <img id="memeImg" alt="meme" style="display:none;" />
+    </div>
+
+    <!-- Stats section -->
+    <div id="statsSection" class="stats-section">
+      <div class="stats-title">📊 Tilastot</div>
+      
+      <div class="stats-totals">
+        <div class="stat-box">
+          <div id="totalMinutes" class="stat-value">0</div>
+          <div class="stat-label">Minuuttia yhteensä</div>
+        </div>
+        <div class="stat-box">
+          <div id="totalCount" class="stat-value">0</div>
+          <div class="stat-label">Kertaa yhteensä</div>
+        </div>
+      </div>
+
+      <div class="per-tag-title">Lajeittain:</div>
+      <div id="perTagList" class="per-tag-list">
+        <!-- Täytetään dynaamisesti -->
+      </div>
     </div>
   </div>
 
@@ -242,6 +331,10 @@
     const secretInput = document.getElementById('secret');
     const secretSaved = document.getElementById('secretSaved');
     const minutesDisplay = document.getElementById('minutesDisplay');
+    const statsSection = document.getElementById('statsSection');
+    const totalMinutesEl = document.getElementById('totalMinutes');
+    const totalCountEl = document.getElementById('totalCount');
+    const perTagList = document.getElementById('perTagList');
 
     // Minuuttilaskuri
     let currentMinutes = 0;
@@ -291,6 +384,30 @@
       memeText.style.display = 'none';
     }
 
+    function updateStats(saved) {
+      // Päivitä kokonaistilastot
+      totalMinutesEl.textContent = saved.totalMinutes || 0;
+      totalCountEl.textContent = saved.totalCount || 0;
+
+      // Päivitä lajikohtaiset tilastot
+      perTagList.innerHTML = '';
+      
+      if (saved.perTag && saved.perTag.length > 0) {
+        saved.perTag.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'per-tag-item';
+          div.innerHTML = `
+            <span class="per-tag-name">${item.tag}</span>
+            <span class="per-tag-stats">${item.count} kertaa (${item.minutes} min)</span>
+          `;
+          perTagList.appendChild(div);
+        });
+      }
+
+      // Näytä tilastot-osio
+      statsSection.style.display = 'block';
+    }
+
     function loadSecret() {
       const saved = localStorage.getItem('appSecret');
       if (saved) {
@@ -324,14 +441,13 @@
 
       const secret = secretInput.value.trim();
       
-      // Payload sisältää minutes-kentän
       const payload = {
         secret: secret,
         user: getSelectedUser(),
         date: document.getElementById('date').value,
         tag: getSelectedTag(),
         note: document.getElementById('note').value.trim(),
-        minutes: currentMinutes  // <-- Minuutit lisätty tähän
+        minutes: currentMinutes
       };
 
       try {
@@ -359,13 +475,17 @@
         const saved = json.saved;
         setStatus(`Tallennettu! Suorituksia: ${saved.countForUser}`, 'success');
 
+        // Näytä yllätys jos tuli
         if (saved.surpriseShown && saved.memeUrl) {
           showSurprise(saved.memeUrl);
         }
 
-        // Nollaa kentät onnistuneen lähetyksen jälkeen
+        // Päivitä tilastot
+        updateStats(saved);
+
+        // Nollaa kentät
         document.getElementById('note').value = '';
-        resetMinutes();  // <-- Minuutit nollataan
+        resetMinutes();
 
       } catch (err) {
         setStatus('Verkkovirhe: ' + err.message, 'error');
