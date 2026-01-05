@@ -206,6 +206,60 @@
       color: #666;
       font-size: 13px;
     }
+
+    /* Time period stats */
+    .period-section {
+      margin-top: 16px;
+      display: none;
+    }
+    .period-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .period-card {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #e0e0e0;
+    }
+    .period-card.weekly {
+      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+      border-color: #a5d6a7;
+    }
+    .period-card.monthly {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-color: #90caf9;
+    }
+    .period-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .period-stat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .period-stat-label {
+      color: #555;
+    }
+    .period-stat-value {
+      font-weight: 600;
+      color: #1a73e8;
+    }
+    .period-top-tag {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      font-size: 12px;
+      color: #666;
+    }
+    .period-top-tag span {
+      font-weight: 600;
+      color: #333;
+    }
   </style>
 </head>
 <body>
@@ -291,9 +345,44 @@
       <img id="memeImg" alt="meme" style="display:none;" />
     </div>
 
+    <!-- Weekly & Monthly stats -->
+    <div id="periodSection" class="period-section">
+      <div class="period-cards">
+        <div class="period-card weekly">
+          <div class="period-card-title">📅 Tällä viikolla</div>
+          <div class="period-stat-row">
+            <span class="period-stat-label">Minuutit:</span>
+            <span id="weekMinutes" class="period-stat-value">0</span>
+          </div>
+          <div class="period-stat-row">
+            <span class="period-stat-label">Kerrat:</span>
+            <span id="weekCount" class="period-stat-value">0</span>
+          </div>
+          <div class="period-top-tag">
+            Suosituin: <span id="weekTopTag">-</span>
+          </div>
+        </div>
+        
+        <div class="period-card monthly">
+          <div class="period-card-title">📆 Tässä kuussa</div>
+          <div class="period-stat-row">
+            <span class="period-stat-label">Minuutit:</span>
+            <span id="monthMinutes" class="period-stat-value">0</span>
+          </div>
+          <div class="period-stat-row">
+            <span class="period-stat-label">Kerrat:</span>
+            <span id="monthCount" class="period-stat-value">0</span>
+          </div>
+          <div class="period-top-tag">
+            Suosituin: <span id="monthTopTag">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Stats section -->
     <div id="statsSection" class="stats-section">
-      <div class="stats-title">📊 Tilastot</div>
+      <div class="stats-title">📊 Yhteensä</div>
       
       <div class="stats-totals">
         <div class="stat-box">
@@ -335,6 +424,13 @@
     const totalMinutesEl = document.getElementById('totalMinutes');
     const totalCountEl = document.getElementById('totalCount');
     const perTagList = document.getElementById('perTagList');
+    const periodSection = document.getElementById('periodSection');
+    const weekMinutesEl = document.getElementById('weekMinutes');
+    const weekCountEl = document.getElementById('weekCount');
+    const weekTopTagEl = document.getElementById('weekTopTag');
+    const monthMinutesEl = document.getElementById('monthMinutes');
+    const monthCountEl = document.getElementById('monthCount');
+    const monthTopTagEl = document.getElementById('monthTopTag');
 
     // Minuuttilaskuri
     let currentMinutes = 0;
@@ -384,16 +480,16 @@
       memeText.style.display = 'none';
     }
 
-    function updateStats(saved) {
-      // Päivitä kokonaistilastot - luetaan saved-objektista
-      totalMinutesEl.textContent = saved.totalMinutes || 0;
-      totalCountEl.textContent = saved.totalCount || 0;
+    function updateStats(s) {
+      // Päivitä kokonaistilastot
+      totalMinutesEl.textContent = s.totalMinutes ?? 0;
+      totalCountEl.textContent = s.totalCount ?? 0;
 
-      // Päivitä lajikohtaiset tilastot - luetaan saved.perTag
+      // Päivitä lajikohtaiset tilastot
       perTagList.innerHTML = '';
       
-      if (saved.perTag && saved.perTag.length > 0) {
-        saved.perTag.forEach(item => {
+      if (s.perTag && s.perTag.length > 0) {
+        s.perTag.forEach(item => {
           const div = document.createElement('div');
           div.className = 'per-tag-item';
           div.innerHTML = `
@@ -404,8 +500,21 @@
         });
       }
 
-      // Näytä tilastot-osio
       statsSection.style.display = 'block';
+    }
+
+    function updatePeriodStats(s) {
+      // Viikkotilastot
+      weekMinutesEl.textContent = s.weeklyMinutes ?? 0;
+      weekCountEl.textContent = s.weeklyCount ?? 0;
+      weekTopTagEl.textContent = s.weeklyTopTag || '-';
+
+      // Kuukausitilastot
+      monthMinutesEl.textContent = s.monthlyMinutes ?? 0;
+      monthCountEl.textContent = s.monthlyCount ?? 0;
+      monthTopTagEl.textContent = s.monthlyTopTag || '-';
+
+      periodSection.style.display = 'block';
     }
 
     function loadSecret() {
@@ -472,21 +581,17 @@
 
         saveSecret(secret);
 
-        // KORJAUS: Kaikki kentät luetaan json.saved -objektista
-        const saved = json.saved;
+        const s = json.saved;
         
-        // KORJAUS: totalCount saved-objektista (ei countForUser)
-        setStatus(`Tallennettu! Suorituksia: ${saved.totalCount}`, 'success');
+        setStatus(`Tallennettu! Suorituksia: ${s.totalCount ?? 0}`, 'success');
 
-        // KORJAUS: surpriseShown ja memeUrl luetaan saved-objektista
-        if (saved.surpriseShown && saved.memeUrl) {
-          showSurprise(saved.memeUrl);
+        if (s.surpriseShown && s.memeUrl) {
+          showSurprise(s.memeUrl);
         }
 
-        // Päivitä tilastot - saved sisältää totalMinutes, totalCount, perTag
-        updateStats(saved);
+        updatePeriodStats(s);
+        updateStats(s);
 
-        // Nollaa kentät
         document.getElementById('note').value = '';
         resetMinutes();
 
