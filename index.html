@@ -385,11 +385,11 @@
     }
 
     function updateStats(saved) {
-      // Päivitä kokonaistilastot
+      // Päivitä kokonaistilastot - luetaan saved-objektista
       totalMinutesEl.textContent = saved.totalMinutes || 0;
       totalCountEl.textContent = saved.totalCount || 0;
 
-      // Päivitä lajikohtaiset tilastot
+      // Päivitä lajikohtaiset tilastot - luetaan saved.perTag
       perTagList.innerHTML = '';
       
       if (saved.perTag && saved.perTag.length > 0) {
@@ -472,15 +472,18 @@
 
         saveSecret(secret);
 
+        // KORJAUS: Kaikki kentät luetaan json.saved -objektista
         const saved = json.saved;
-        setStatus(`Tallennettu! Suorituksia: ${saved.countForUser}`, 'success');
+        
+        // KORJAUS: totalCount saved-objektista (ei countForUser)
+        setStatus(`Tallennettu! Suorituksia: ${saved.totalCount}`, 'success');
 
-        // Näytä yllätys jos tuli
+        // KORJAUS: surpriseShown ja memeUrl luetaan saved-objektista
         if (saved.surpriseShown && saved.memeUrl) {
           showSurprise(saved.memeUrl);
         }
 
-        // Päivitä tilastot
+        // Päivitä tilastot - saved sisältää totalMinutes, totalCount, perTag
         updateStats(saved);
 
         // Nollaa kentät
