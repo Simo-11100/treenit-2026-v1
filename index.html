@@ -12,260 +12,156 @@
   <link rel="icon" href="icon-192.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon-192.svg" />
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; }
-    .card { max-width: 520px; margin: 0 auto; padding: 16px; border: 1px solid #e5e5e5; border-radius: 16px; background: white; }
-    label { display: block; margin-top: 12px; font-size: 14px; color: #333; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 12px; background: #f5f5f5; }
+    .card { max-width: 520px; margin: 0 auto; padding: 14px; border: 1px solid #e5e5e5; border-radius: 16px; background: white; margin-bottom: 12px; }
+    label { display: block; margin-top: 10px; font-size: 13px; color: #333; font-weight: 500; }
     input, select, textarea, button {
-      width: 100%; box-sizing: border-box; margin-top: 6px;
-      padding: 12px; font-size: 16px; border-radius: 12px; border: 1px solid #ddd;
+      width: 100%; margin-top: 5px;
+      padding: 11px; font-size: 16px; border-radius: 10px; border: 1px solid #ddd;
     }
     input:focus, select:focus, textarea:focus { outline: none; border-color: #4285f4; }
-    textarea { min-height: 84px; resize: vertical; }
-    button { margin-top: 14px; cursor: pointer; background: #4285f4; color: white; border: none; font-weight: 600; }
+    textarea { min-height: 70px; resize: vertical; }
+    button { margin-top: 12px; cursor: pointer; background: #4285f4; color: white; border: none; font-weight: 600; }
     button:active { background: #3367d6; }
-    .status { margin-top: 12px; font-size: 14px; }
+    .status { margin-top: 10px; font-size: 14px; }
     .status.error { color: #d93025; }
     .status.success { color: #1e8e3e; }
-    .memeWrap { margin-top: 14px; display: none; padding: 16px; background: #fffbeb; border: 2px solid #fbbf24; border-radius: 16px; }
-    .memeWrap img { width: 100%; border-radius: 12px; margin-top: 8px; }
-    .memeTitle { font-size: 16px; font-weight: 600; }
-    #memeText { margin-top: 10px; font-size: 15px; line-height: 1.5; color: #333; }
-    .small { color: #666; font-size: 12px; margin-top: 6px; }
-    .secret-row { display: flex; gap: 10px; align-items: flex-end; }
-    .secret-row > div:first-child { flex: 1; }
-    .secret-saved { font-size: 11px; color: #1e8e3e; margin-top: 4px; }
     
-    .user-select { display: flex; gap: 12px; margin-top: 8px; }
+    /* Meme/surprise */
+    .memeWrap { margin-top: 12px; display: none; padding: 14px; background: #fffbeb; border: 2px solid #fbbf24; border-radius: 14px; }
+    .memeWrap img { width: 100%; border-radius: 10px; margin-top: 8px; }
+    .memeTitle { font-size: 15px; font-weight: 600; }
+    #memeText { margin-top: 8px; font-size: 14px; line-height: 1.4; color: #333; }
+    
+    .small { color: #666; font-size: 11px; margin-top: 4px; }
+    .secret-row { display: flex; gap: 8px; align-items: flex-end; }
+    .secret-row > div:first-child { flex: 1; }
+    .secret-saved { font-size: 10px; color: #1e8e3e; margin-top: 3px; }
+    
+    /* User select */
+    .user-select { display: flex; gap: 10px; margin-top: 6px; }
     .user-select label {
-      flex: 1;
-      margin: 0;
-      padding: 14px 16px;
-      border: 2px solid #ddd;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 16px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      flex: 1; margin: 0; padding: 12px;
+      border: 2px solid #ddd; border-radius: 10px;
+      text-align: center; font-size: 15px; font-weight: 500; cursor: pointer;
     }
-    .user-select input[type="radio"] {
-      display: none;
-    }
+    .user-select input[type="radio"] { display: none; }
     .user-select input[type="radio"]:checked + label {
-      border-color: #4285f4;
-      background: #e8f0fe;
-      color: #1a73e8;
-    }
-    .user-select label:active {
-      transform: scale(0.98);
+      border-color: #4285f4; background: #e8f0fe; color: #1a73e8;
     }
 
-    .tag-select { 
-      display: grid; 
-      grid-template-columns: repeat(3, 1fr); 
-      gap: 10px; 
-      margin-top: 8px; 
-    }
+    /* Tag select */
+    .tag-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
     .tag-select label {
-      margin: 0;
-      padding: 12px 8px;
-      border: 2px solid #ddd;
-      border-radius: 12px;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.15s ease;
+      margin: 0; padding: 10px 6px;
+      border: 2px solid #ddd; border-radius: 10px;
+      text-align: center; font-size: 13px; font-weight: 500; cursor: pointer;
     }
-    .tag-select input[type="radio"] {
-      display: none;
-    }
+    .tag-select input[type="radio"] { display: none; }
     .tag-select input[type="radio"]:checked + label {
-      border-color: #34a853;
-      background: #e6f4ea;
-      color: #1e8e3e;
-    }
-    .tag-select label:active {
-      transform: scale(0.98);
+      border-color: #34a853; background: #e6f4ea; color: #1e8e3e;
     }
 
-    .date-row { margin-top: 12px; }
-
-    /* Minutes section */
-    .minutes-section { margin-top: 16px; }
+    /* Minutes */
+    .minutes-section { margin-top: 14px; }
     .minutes-display {
-      text-align: center;
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a73e8;
-      padding: 12px;
-      background: #e8f0fe;
-      border-radius: 12px;
-      margin: 8px 0 12px 0;
+      text-align: center; font-size: 26px; font-weight: 700; color: #1a73e8;
+      padding: 10px; background: #e8f0fe; border-radius: 10px; margin: 6px 0 10px 0;
     }
-    .minutes-buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
+    .minutes-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
     .minutes-buttons button {
-      margin: 0;
-      padding: 14px 8px;
-      font-size: 14px;
-      font-weight: 600;
-      border-radius: 10px;
-      width: 100%;
+      margin: 0; padding: 12px 6px; font-size: 13px; font-weight: 600; border-radius: 8px;
     }
-    .minutes-buttons .btn-plus {
-      background: #34a853;
-      color: white;
-    }
-    .minutes-buttons .btn-plus:active {
-      background: #2d8f47;
-    }
-    .minutes-buttons .btn-minus {
-      background: #ea4335;
-      color: white;
-    }
-    .minutes-buttons .btn-minus:active {
-      background: #c5352a;
-    }
-    .minutes-reset {
-      margin-top: 8px;
-      background: #9aa0a6;
-      font-size: 14px;
-      padding: 10px;
-    }
-    .minutes-reset:active {
-      background: #80868b;
-    }
+    .btn-plus { background: #34a853; color: white; }
+    .btn-plus:active { background: #2d8f47; }
+    .btn-minus { background: #ea4335; color: white; }
+    .btn-minus:active { background: #c5352a; }
+    .minutes-reset { margin-top: 6px; background: #9aa0a6; font-size: 13px; padding: 8px; }
 
-    /* Stats section */
-    .stats-section {
-      margin-top: 16px;
-      padding: 16px;
-      background: #f0f4f9;
-      border-radius: 12px;
-      display: none;
+    /* Report sections */
+    .report-section { display: none; }
+    .section-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 10px; }
+    
+    /* Totals */
+    .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    .total-box {
+      background: #f8f9fa; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #e0e0e0;
     }
-    .stats-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #1a73e8;
-    }
-    .stats-totals {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-    .stat-box {
-      background: white;
-      padding: 12px;
-      border-radius: 10px;
-      text-align: center;
-      border: 1px solid #e0e0e0;
-    }
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: #1a73e8;
-    }
-    .stat-label {
-      font-size: 12px;
-      color: #666;
-      margin-top: 4px;
-    }
-    .per-tag-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #333;
-    }
-    .per-tag-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .total-value { font-size: 22px; font-weight: 700; color: #1a73e8; }
+    .total-label { font-size: 11px; color: #666; margin-top: 2px; }
+    
+    /* Per tag list */
+    .per-tag-list { display: flex; flex-direction: column; gap: 5px; }
     .per-tag-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: white;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 14px;
-      border: 1px solid #e0e0e0;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f8f9fa; padding: 8px 10px; border-radius: 8px; font-size: 13px;
     }
-    .per-tag-name {
-      font-weight: 500;
-      color: #333;
+    .per-tag-name { font-weight: 500; }
+    .per-tag-stats { color: #666; font-size: 12px; }
+
+    /* Progress bar */
+    .progress-wrap { margin: 8px 0; }
+    .progress-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+    .progress-title { font-weight: 500; }
+    .progress-nums { color: #666; }
+    .progress-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: #34a853; border-radius: 4px; transition: width 0.3s; }
+    .progress-fill.over { background: #fbbf24; }
+    .progress-sub { font-size: 11px; color: #888; margin-top: 3px; }
+
+    /* Recent weeks mini bars */
+    .recent-weeks { margin-top: 12px; }
+    .recent-weeks-title { font-size: 12px; color: #666; margin-bottom: 6px; }
+    .recent-bars { display: flex; gap: 4px; align-items: flex-end; height: 40px; }
+    .recent-bar {
+      flex: 1; background: #4285f4; border-radius: 2px 2px 0 0; min-height: 2px;
+      position: relative;
     }
-    .per-tag-stats {
-      color: #666;
-      font-size: 13px;
+    .recent-bar:hover::after {
+      content: attr(data-tip); position: absolute; bottom: 100%; left: 50%;
+      transform: translateX(-50%); background: #333; color: white;
+      padding: 2px 6px; border-radius: 4px; font-size: 10px; white-space: nowrap;
     }
 
-    /* Time period stats */
-    .period-section {
-      margin-top: 16px;
-      display: none;
+    /* Year heatmap */
+    .year-section { margin-top: 14px; }
+    .year-title { font-size: 12px; color: #666; margin-bottom: 6px; }
+    .year-grid {
+      display: grid; grid-template-columns: repeat(26, 1fr); gap: 2px;
     }
-    .period-cards {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
+    .year-cell {
+      aspect-ratio: 1; border-radius: 2px; background: #e0e0e0;
     }
-    .period-card {
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid #e0e0e0;
+    .year-cell.l1 { background: #fef3c7; } /* vaalea keltainen */
+    .year-cell.l2 { background: #fcd34d; } /* keltainen */
+    .year-cell.l3 { background: #f97316; } /* oranssi */
+    .year-cell.l4 { background: #22c55e; } /* vihreä */
+    .year-cell.l5 { background: #15803d; } /* tummanvihreä */
+    
+    /* Year legend */
+    .year-legend {
+      display: flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 10px; color: #666;
+      flex-wrap: wrap;
     }
-    .period-card.weekly {
-      background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
-      border-color: #a5d6a7;
+    .year-legend-item {
+      display: flex; align-items: center; gap: 2px;
     }
-    .period-card.monthly {
-      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-      border-color: #90caf9;
+    .year-legend-box {
+      width: 12px; height: 12px; border-radius: 2px;
     }
-    .period-card-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 10px;
-    }
-    .period-stat-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-    .period-stat-label {
-      color: #555;
-    }
-    .period-stat-value {
-      font-weight: 600;
-      color: #1a73e8;
-    }
-    .period-top-tag {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px solid rgba(0,0,0,0.1);
-      font-size: 12px;
-      color: #666;
-    }
-    .period-top-tag span {
-      font-weight: 600;
-      color: #333;
-    }
+    .year-legend-box.l0 { background: #e0e0e0; }
+    .year-legend-box.l1 { background: #fef3c7; }
+    .year-legend-box.l2 { background: #fcd34d; }
+    .year-legend-box.l3 { background: #f97316; }
+    .year-legend-box.l4 { background: #22c55e; }
+    .year-legend-box.l5 { background: #15803d; }
   </style>
 </head>
 <body>
   <div class="card">
-    <div style="font-size:18px; font-weight:600;">Suoritukset 2026</div>
-    <div class="small">Kirjaa suoritus. Yllätys osuu satunnaisesti!</div>
+    <div style="font-size:17px; font-weight:600;">Suoritukset 2026</div>
+    <div class="small">Kirjaa suoritus</div>
 
     <form id="f">
       <div class="secret-row">
@@ -287,41 +183,32 @@
       <label>Laji</label>
       <div class="tag-select">
         <input type="radio" id="tagKuntosali" name="tag" value="Kuntosali" required />
-        <label for="tagKuntosali">🏋️ Kuntosali</label>
-        
+        <label for="tagKuntosali">🏋️ Sali</label>
         <input type="radio" id="tagJuoksu" name="tag" value="Juoksu" />
         <label for="tagJuoksu">🏃 Juoksu</label>
-        
         <input type="radio" id="tagUinti" name="tag" value="Uinti" />
         <label for="tagUinti">🏊 Uinti</label>
-        
         <input type="radio" id="tagKuntopiiri" name="tag" value="Kuntopiiri" />
-        <label for="tagKuntopiiri">🔄 Kuntopiiri</label>
-        
+        <label for="tagKuntopiiri">🔄 Piiri</label>
         <input type="radio" id="tagJooga" name="tag" value="Jooga" />
         <label for="tagJooga">🧘 Jooga</label>
-        
         <input type="radio" id="tagPyoraily" name="tag" value="Pyöräily" />
-        <label for="tagPyoraily">🚴 Pyöräily</label>
+        <label for="tagPyoraily">🚴 Pyörä</label>
       </div>
 
-      <div class="date-row">
-        <label>Päivä</label>
-        <input id="date" type="date" required />
-      </div>
+      <label>Päivä</label>
+      <input id="date" type="date" required />
 
-      <!-- Minutes section -->
       <div class="minutes-section">
         <label>Kesto (min)</label>
         <div id="minutesDisplay" class="minutes-display">0 min</div>
-        
         <div class="minutes-buttons">
           <button type="button" class="btn-plus" onclick="addMinutes(1)">+1</button>
           <button type="button" class="btn-plus" onclick="addMinutes(5)">+5</button>
           <button type="button" class="btn-plus" onclick="addMinutes(10)">+10</button>
           <button type="button" class="btn-plus" onclick="addMinutes(15)">+15</button>
         </div>
-        <div class="minutes-buttons" style="margin-top: 8px;">
+        <div class="minutes-buttons" style="margin-top:6px;">
           <button type="button" class="btn-minus" onclick="addMinutes(-1)">−1</button>
           <button type="button" class="btn-minus" onclick="addMinutes(-5)">−5</button>
           <button type="button" class="btn-minus" onclick="addMinutes(-10)">−10</button>
@@ -330,74 +217,83 @@
         <button type="button" class="minutes-reset" onclick="resetMinutes()">Nollaa</button>
       </div>
 
-      <label>Lisähuomio (valinnainen)</label>
-      <textarea id="note" placeholder="Esim. 5 km / fiilis / aika..."></textarea>
+      <label>Huomio (valinnainen)</label>
+      <textarea id="note" placeholder="Esim. 5 km, hyvä fiilis..."></textarea>
 
       <button type="submit">Tallenna</button>
     </form>
 
     <div id="status" class="status"></div>
 
-    <!-- Surprise section -->
+    <!-- Meme/surprise -->
     <div id="memeWrap" class="memeWrap">
       <div class="memeTitle">🎉 Yllätys!</div>
       <div id="memeText"></div>
       <img id="memeImg" alt="meme" style="display:none;" />
     </div>
+  </div>
 
-    <!-- Weekly & Monthly stats -->
-    <div id="periodSection" class="period-section">
-      <div class="period-cards">
-        <div class="period-card weekly">
-          <div class="period-card-title">📅 Tällä viikolla</div>
-          <div class="period-stat-row">
-            <span class="period-stat-label">Minuutit:</span>
-            <span id="weekMinutes" class="period-stat-value">0</span>
-          </div>
-          <div class="period-stat-row">
-            <span class="period-stat-label">Kerrat:</span>
-            <span id="weekCount" class="period-stat-value">0</span>
-          </div>
-          <div class="period-top-tag">
-            Suosituin: <span id="weekTopTag">-</span>
-          </div>
+  <!-- Report card -->
+  <div id="reportCard" class="card report-section">
+    
+    <!-- Week stats -->
+    <div class="section-title">📅 Tämä viikko</div>
+    <div class="progress-wrap">
+      <div class="progress-header">
+        <span id="weekLabel" class="progress-title">Viikko</span>
+        <span id="weekNums" class="progress-nums">0 / 150 min</span>
+      </div>
+      <div class="progress-bar"><div id="weekFill" class="progress-fill" style="width:0%"></div></div>
+      <div id="weekSub" class="progress-sub">0 kertaa</div>
+    </div>
+
+    <!-- Recent 8 weeks -->
+    <div class="recent-weeks">
+      <div class="recent-weeks-title">Viimeiset 8 viikkoa</div>
+      <div id="recentBars" class="recent-bars"></div>
+    </div>
+
+    <!-- Month stats -->
+    <div style="margin-top:16px;">
+      <div class="section-title">📆 Tämä kuukausi</div>
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span id="monthLabel" class="progress-title">Kuukausi</span>
+          <span id="monthNums" class="progress-nums">0 / 600 min</span>
         </div>
-        
-        <div class="period-card monthly">
-          <div class="period-card-title">📆 Tässä kuussa</div>
-          <div class="period-stat-row">
-            <span class="period-stat-label">Minuutit:</span>
-            <span id="monthMinutes" class="period-stat-value">0</span>
-          </div>
-          <div class="period-stat-row">
-            <span class="period-stat-label">Kerrat:</span>
-            <span id="monthCount" class="period-stat-value">0</span>
-          </div>
-          <div class="period-top-tag">
-            Suosituin: <span id="monthTopTag">-</span>
-          </div>
-        </div>
+        <div class="progress-bar"><div id="monthFill" class="progress-fill" style="width:0%"></div></div>
+        <div id="monthSub" class="progress-sub">0 kertaa</div>
       </div>
     </div>
 
-    <!-- Stats section -->
-    <div id="statsSection" class="stats-section">
-      <div class="stats-title">📊 Yhteensä</div>
-      
-      <div class="stats-totals">
-        <div class="stat-box">
-          <div id="totalMinutes" class="stat-value">0</div>
-          <div class="stat-label">Minuuttia yhteensä</div>
+    <!-- Totals -->
+    <div style="margin-top:16px;">
+      <div class="section-title">📊 Yhteensä</div>
+      <div class="totals-grid">
+        <div class="total-box">
+          <div id="totalMinutes" class="total-value">0</div>
+          <div class="total-label">minuuttia</div>
         </div>
-        <div class="stat-box">
-          <div id="totalCount" class="stat-value">0</div>
-          <div class="stat-label">Kertaa yhteensä</div>
+        <div class="total-box">
+          <div id="totalCount" class="total-value">0</div>
+          <div class="total-label">kertaa</div>
         </div>
       </div>
+      <div id="perTagList" class="per-tag-list"></div>
+    </div>
 
-      <div class="per-tag-title">Lajeittain:</div>
-      <div id="perTagList" class="per-tag-list">
-        <!-- Täytetään dynaamisesti -->
+    <!-- Year heatmap -->
+    <div class="year-section">
+      <div class="year-title">🗓️ Vuosi 2026 (viikot)</div>
+      <div id="yearGrid" class="year-grid"></div>
+      <div class="year-legend">
+        <div class="year-legend-item"><div class="year-legend-box l0"></div><span>0</span></div>
+        <div class="year-legend-item"><div class="year-legend-box l1"></div><span>1-30</span></div>
+        <div class="year-legend-item"><div class="year-legend-box l2"></div><span>31-60</span></div>
+        <div class="year-legend-item"><div class="year-legend-box l3"></div><span>61-120</span></div>
+        <div class="year-legend-item"><div class="year-legend-box l4"></div><span>121-180</span></div>
+        <div class="year-legend-item"><div class="year-legend-box l5"></div><span>180+</span></div>
+        <span style="margin-left:4px;">(min/vko)</span>
       </div>
     </div>
   </div>
@@ -405,45 +301,30 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbzBi_b_aoB6QcdvxczEYUBHBAjiziHe3BRsECU5iu1ehBXL8ktwYN2dle7ZMqDYEdWq/exec";
 
-    // Rekisteröi service worker
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('✅ Service Worker registered'))
-        .catch(err => console.log('Service Worker error:', err));
+      navigator.serviceWorker.register('service-worker.js').catch(() => {});
     }
 
-    const f = document.getElementById('f');
-    const statusEl = document.getElementById('status');
-    const memeWrap = document.getElementById('memeWrap');
-    const memeImg = document.getElementById('memeImg');
-    const memeText = document.getElementById('memeText');
-    const secretInput = document.getElementById('secret');
-    const secretSaved = document.getElementById('secretSaved');
-    const minutesDisplay = document.getElementById('minutesDisplay');
-    const statsSection = document.getElementById('statsSection');
-    const totalMinutesEl = document.getElementById('totalMinutes');
-    const totalCountEl = document.getElementById('totalCount');
-    const perTagList = document.getElementById('perTagList');
-    const periodSection = document.getElementById('periodSection');
-    const weekMinutesEl = document.getElementById('weekMinutes');
-    const weekCountEl = document.getElementById('weekCount');
-    const weekTopTagEl = document.getElementById('weekTopTag');
-    const monthMinutesEl = document.getElementById('monthMinutes');
-    const monthCountEl = document.getElementById('monthCount');
-    const monthTopTagEl = document.getElementById('monthTopTag');
+    const $ = id => document.getElementById(id);
+    const f = $('f');
+    const statusEl = $('status');
+    const memeWrap = $('memeWrap');
+    const memeImg = $('memeImg');
+    const memeText = $('memeText');
+    const secretInput = $('secret');
+    const secretSaved = $('secretSaved');
+    const minutesDisplay = $('minutesDisplay');
+    const reportCard = $('reportCard');
 
-    // Minuuttilaskuri
     let currentMinutes = 0;
 
     function updateMinutesDisplay() {
       minutesDisplay.textContent = currentMinutes + ' min';
     }
-
-    function addMinutes(amount) {
-      currentMinutes = Math.max(0, currentMinutes + amount);
+    function addMinutes(n) {
+      currentMinutes = Math.max(0, currentMinutes + n);
       updateMinutesDisplay();
     }
-
     function resetMinutes() {
       currentMinutes = 0;
       updateMinutesDisplay();
@@ -454,24 +335,19 @@
       statusEl.className = 'status' + (type ? ' ' + type : '');
     }
 
-    function showSurprise(value) {
-      if (!value) return;
-      
-      if (value.startsWith('http')) {
-        memeImg.src = value;
+    function showSurprise(val) {
+      if (!val) return;
+      if (val.startsWith('http')) {
+        memeImg.src = val;
         memeImg.style.display = 'block';
         memeText.style.display = 'none';
-        memeText.textContent = '';
       } else {
-        memeText.textContent = value;
+        memeText.textContent = val;
         memeText.style.display = 'block';
         memeImg.style.display = 'none';
-        memeImg.src = '';
       }
-      
       memeWrap.style.display = 'block';
     }
-
     function hideSurprise() {
       memeWrap.style.display = 'none';
       memeImg.src = '';
@@ -480,82 +356,109 @@
       memeText.style.display = 'none';
     }
 
-    function updateStats(s) {
-      // Päivitä kokonaistilastot
-      totalMinutesEl.textContent = s.totalMinutes ?? 0;
-      totalCountEl.textContent = s.totalCount ?? 0;
+    function renderReport(s) {
+      // Week
+      const wMin = s.weeklyMinutes ?? 0;
+      const wGoal = s.weeklyGoal ?? 150;
+      const wPct = Math.min(100, Math.round((wMin / wGoal) * 100));
+      $('weekLabel').textContent = s.weekLabel || 'Viikko';
+      $('weekNums').textContent = `${wMin} / ${wGoal} min`;
+      $('weekFill').style.width = wPct + '%';
+      $('weekFill').className = 'progress-fill' + (wPct >= 100 ? ' over' : '');
+      $('weekSub').textContent = (s.weeklyCount ?? 0) + ' kertaa';
 
-      // Päivitä lajikohtaiset tilastot
-      perTagList.innerHTML = '';
-      
-      if (s.perTag && s.perTag.length > 0) {
-        s.perTag.forEach(item => {
-          const div = document.createElement('div');
-          div.className = 'per-tag-item';
-          div.innerHTML = `
-            <span class="per-tag-name">${item.tag}</span>
-            <span class="per-tag-stats">${item.count} kertaa (${item.minutes} min)</span>
-          `;
-          perTagList.appendChild(div);
-        });
+      // Recent weeks
+      const recentBars = $('recentBars');
+      recentBars.innerHTML = '';
+      const rw = s.recentWeeks || [];
+      const maxMin = Math.max(...rw.map(w => w.minutes || 0), 1);
+      rw.forEach(w => {
+        const bar = document.createElement('div');
+        bar.className = 'recent-bar';
+        const h = Math.max(2, Math.round(((w.minutes || 0) / maxMin) * 38));
+        bar.style.height = h + 'px';
+        bar.setAttribute('data-tip', `${w.week}: ${w.minutes}min`);
+        recentBars.appendChild(bar);
+      });
+
+      // Month
+      const mMin = s.monthlyMinutes ?? 0;
+      const mGoal = s.monthlyGoal ?? 600;
+      const mPct = Math.min(100, Math.round((mMin / mGoal) * 100));
+      $('monthLabel').textContent = s.monthLabel || 'Kuukausi';
+      $('monthNums').textContent = `${mMin} / ${mGoal} min`;
+      $('monthFill').style.width = mPct + '%';
+      $('monthFill').className = 'progress-fill' + (mPct >= 100 ? ' over' : '');
+      $('monthSub').textContent = (s.monthlyCount ?? 0) + ' kertaa';
+
+      // Totals
+      $('totalMinutes').textContent = s.totalMinutes ?? 0;
+      $('totalCount').textContent = s.totalCount ?? 0;
+
+      // Per tag
+      const ptl = $('perTagList');
+      ptl.innerHTML = '';
+      (s.perTag || []).forEach(t => {
+        const d = document.createElement('div');
+        d.className = 'per-tag-item';
+        d.innerHTML = `<span class="per-tag-name">${t.tag}</span><span class="per-tag-stats">${t.count}× (${t.minutes} min)</span>`;
+        ptl.appendChild(d);
+      });
+
+      // Year grid
+      const yg = $('yearGrid');
+      yg.innerHTML = '';
+      const yw = s.yearWeeks || [];
+      for (let i = 1; i <= 52; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'year-cell';
+        const wk = yw.find(w => w.weekNum === i);
+        if (wk) {
+          const m = wk.minutes || 0;
+          if (m >= 1 && m <= 30) cell.classList.add('l1');
+          else if (m >= 31 && m <= 60) cell.classList.add('l2');
+          else if (m >= 61 && m <= 120) cell.classList.add('l3');
+          else if (m >= 121 && m <= 180) cell.classList.add('l4');
+          else if (m > 180) cell.classList.add('l5');
+        }
+        yg.appendChild(cell);
       }
 
-      statsSection.style.display = 'block';
-    }
-
-    function updatePeriodStats(s) {
-      // Viikkotilastot
-      weekMinutesEl.textContent = s.weeklyMinutes ?? 0;
-      weekCountEl.textContent = s.weeklyCount ?? 0;
-      weekTopTagEl.textContent = s.weeklyTopTag || '-';
-
-      // Kuukausitilastot
-      monthMinutesEl.textContent = s.monthlyMinutes ?? 0;
-      monthCountEl.textContent = s.monthlyCount ?? 0;
-      monthTopTagEl.textContent = s.monthlyTopTag || '-';
-
-      periodSection.style.display = 'block';
+      reportCard.style.display = 'block';
     }
 
     function loadSecret() {
-      const saved = localStorage.getItem('appSecret');
-      if (saved) {
-        secretInput.value = saved;
-        secretSaved.style.display = 'block';
-      }
+      const s = localStorage.getItem('appSecret');
+      if (s) { secretInput.value = s; secretSaved.style.display = 'block'; }
     }
-
-    function saveSecret(secret) {
-      localStorage.setItem('appSecret', secret);
+    function saveSecret(s) {
+      localStorage.setItem('appSecret', s);
       secretSaved.style.display = 'block';
     }
 
     function getSelectedUser() {
-      const selected = document.querySelector('input[name="user"]:checked');
-      return selected ? selected.value : '';
+      const el = document.querySelector('input[name="user"]:checked');
+      return el ? el.value : '';
     }
-
     function getSelectedTag() {
-      const selected = document.querySelector('input[name="tag"]:checked');
-      return selected ? selected.value : '';
+      const el = document.querySelector('input[name="tag"]:checked');
+      return el ? el.value : '';
     }
 
     loadSecret();
-    document.getElementById('date').valueAsDate = new Date();
+    $('date').valueAsDate = new Date();
 
     f.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       hideSurprise();
       setStatus('Tallennetaan...');
 
-      const secret = secretInput.value.trim();
-      
       const payload = {
-        secret: secret,
+        secret: secretInput.value.trim(),
         user: getSelectedUser(),
-        date: document.getElementById('date').value,
+        date: $('date').value,
         tag: getSelectedTag(),
-        note: document.getElementById('note').value.trim(),
+        note: $('note').value.trim(),
         minutes: currentMinutes
       };
 
@@ -565,9 +468,8 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-
         const json = await res.json();
-        
+
         if (!json.ok) {
           if (json.error === 'Unauthorized') {
             setStatus('Väärä salasana', 'error');
@@ -579,20 +481,18 @@
           return;
         }
 
-        saveSecret(secret);
-
+        saveSecret(payload.secret);
         const s = json.saved;
-        
-        setStatus(`Tallennettu! Suorituksia: ${s.totalCount ?? 0}`, 'success');
+
+        setStatus(`Tallennettu! Yhteensä: ${s.totalCount ?? 0} kertaa`, 'success');
 
         if (s.surpriseShown && s.memeUrl) {
           showSurprise(s.memeUrl);
         }
 
-        updatePeriodStats(s);
-        updateStats(s);
+        renderReport(s);
 
-        document.getElementById('note').value = '';
+        $('note').value = '';
         resetMinutes();
 
       } catch (err) {
