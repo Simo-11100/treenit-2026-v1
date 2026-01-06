@@ -133,11 +133,11 @@
     .year-cell {
       aspect-ratio: 1; border-radius: 2px; background: #e0e0e0;
     }
-    .year-cell.l1 { background: #fef3c7; } /* vaalea keltainen */
-    .year-cell.l2 { background: #fcd34d; } /* keltainen */
-    .year-cell.l3 { background: #f97316; } /* oranssi */
-    .year-cell.l4 { background: #22c55e; } /* vihreä */
-    .year-cell.l5 { background: #15803d; } /* tummanvihreä */
+    .year-cell.l1 { background: #fef3c7; }
+    .year-cell.l2 { background: #fcd34d; }
+    .year-cell.l3 { background: #f97316; }
+    .year-cell.l4 { background: #22c55e; }
+    .year-cell.l5 { background: #15803d; }
     
     /* Year legend */
     .year-legend {
@@ -356,40 +356,52 @@
       memeText.style.display = 'none';
     }
 
+    function getWeekLabel(w) {
+      return w.weekKey || w.weekStart || '-';
+    }
+
+    function getMonthLabel(m) {
+      return m.monthKey || m.monthStart || '-';
+    }
+
     function renderReport(s) {
-      // Week
-      const wMin = s.weeklyMinutes ?? 0;
-      const wGoal = s.weeklyGoal ?? 150;
-      const wPct = Math.min(100, Math.round((wMin / wGoal) * 100));
-      $('weekLabel').textContent = s.weekLabel || 'Viikko';
+      // Weekly - käytä s.weekly objektia
+      const w = s.weekly || {};
+      const wMin = w.minutes ?? 0;
+      const wGoal = w.goalMinutes ?? 150;
+      const wPct = w.progressPct ?? Math.min(100, Math.round((wMin / wGoal) * 100));
+      $('weekLabel').textContent = getWeekLabel(w);
       $('weekNums').textContent = `${wMin} / ${wGoal} min`;
       $('weekFill').style.width = wPct + '%';
       $('weekFill').className = 'progress-fill' + (wPct >= 100 ? ' over' : '');
-      $('weekSub').textContent = (s.weeklyCount ?? 0) + ' kertaa';
+      $('weekSub').textContent = (w.count ?? 0) + ' kertaa';
 
-      // Recent weeks
+      // Recent weeks - käytä s.recentWeeks
       const recentBars = $('recentBars');
       recentBars.innerHTML = '';
       const rw = s.recentWeeks || [];
-      const maxMin = Math.max(...rw.map(w => w.minutes || 0), 1);
-      rw.forEach(w => {
+      const maxMin = Math.max(...rw.map(x => x.minutes || 0), 1);
+      rw.forEach(week => {
         const bar = document.createElement('div');
         bar.className = 'recent-bar';
-        const h = Math.max(2, Math.round(((w.minutes || 0) / maxMin) * 38));
+        const mins = week.minutes ?? 0;
+        const h = Math.max(2, Math.round((mins / maxMin) * 38));
         bar.style.height = h + 'px';
-        bar.setAttribute('data-tip', `${w.week}: ${w.minutes}min`);
+        const label = week.weekKey || week.weekStart || '-';
+        bar.setAttribute('data-tip', `${label}: ${mins} min`);
         recentBars.appendChild(bar);
       });
 
-      // Month
-      const mMin = s.monthlyMinutes ?? 0;
-      const mGoal = s.monthlyGoal ?? 600;
-      const mPct = Math.min(100, Math.round((mMin / mGoal) * 100));
-      $('monthLabel').textContent = s.monthLabel || 'Kuukausi';
+      // Monthly - käytä s.monthly objektia
+      const m = s.monthly || {};
+      const mMin = m.minutes ?? 0;
+      const mGoal = m.goalMinutes ?? 600;
+      const mPct = m.progressPct ?? Math.min(100, Math.round((mMin / mGoal) * 100));
+      $('monthLabel').textContent = getMonthLabel(m);
       $('monthNums').textContent = `${mMin} / ${mGoal} min`;
       $('monthFill').style.width = mPct + '%';
       $('monthFill').className = 'progress-fill' + (mPct >= 100 ? ' over' : '');
-      $('monthSub').textContent = (s.monthlyCount ?? 0) + ' kertaa';
+      $('monthSub').textContent = (m.count ?? 0) + ' kertaa';
 
       // Totals
       $('totalMinutes').textContent = s.totalMinutes ?? 0;
@@ -405,21 +417,25 @@
         ptl.appendChild(d);
       });
 
-      // Year grid
+      // Year grid - käytä s.yearWeeks
       const yg = $('yearGrid');
       yg.innerHTML = '';
       const yw = s.yearWeeks || [];
       for (let i = 1; i <= 52; i++) {
         const cell = document.createElement('div');
         cell.className = 'year-cell';
-        const wk = yw.find(w => w.weekNum === i);
+        const wk = yw.find(x => {
+          // Tarkista weekKey tai weekNum
+          const weekNum = x.weekNum || (x.weekKey ? parseInt(x.weekKey.split('-W')[1]) : null);
+          return weekNum === i;
+        });
         if (wk) {
-          const m = wk.minutes || 0;
-          if (m >= 1 && m <= 30) cell.classList.add('l1');
-          else if (m >= 31 && m <= 60) cell.classList.add('l2');
-          else if (m >= 61 && m <= 120) cell.classList.add('l3');
-          else if (m >= 121 && m <= 180) cell.classList.add('l4');
-          else if (m > 180) cell.classList.add('l5');
+          const mins = wk.minutes || 0;
+          if (mins >= 1 && mins <= 30) cell.classList.add('l1');
+          else if (mins >= 31 && mins <= 60) cell.classList.add('l2');
+          else if (mins >= 61 && mins <= 120) cell.classList.add('l3');
+          else if (mins >= 121 && mins <= 180) cell.classList.add('l4');
+          else if (mins > 180) cell.classList.add('l5');
         }
         yg.appendChild(cell);
       }
@@ -482,6 +498,8 @@
         }
 
         saveSecret(payload.secret);
+        
+        // Kaikki data tulee json.saved -objektista
         const s = json.saved;
 
         setStatus(`Tallennettu! Yhteensä: ${s.totalCount ?? 0} kertaa`, 'success');
