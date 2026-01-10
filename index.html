@@ -266,6 +266,12 @@
       </div>
     </div>
 
+    <!-- Weekly insight -->
+    <div id="insightSection" style="margin-top:16px; display:none;">
+      <div class="section-title">💡 Viikon palaute</div>
+      <div id="insightText" style="background:#f0f4f9; padding:12px; border-radius:10px; font-size:14px; line-height:1.5; color:#333;"></div>
+    </div>
+
     <!-- Totals -->
     <div style="margin-top:16px;">
       <div class="section-title">📊 Yhteensä</div>
@@ -416,6 +422,17 @@
         d.innerHTML = `<span class="per-tag-name">${t.tag}</span><span class="per-tag-stats">${t.count}× (${t.minutes} min)</span>`;
         ptl.appendChild(d);
       });
+
+      // Weekly insight
+      const insightSection = $('insightSection');
+      const insightText = $('insightText');
+      const insight = s.weeklyInsight || '';
+      if (insight && insight.trim()) {
+        insightText.textContent = insight;
+      } else {
+        insightText.textContent = 'Ei uutta palautetta tänään.';
+      }
+      insightSection.style.display = 'block';
 
       // Year grid - käytä s.yearWeeks
       const yg = $('yearGrid');
