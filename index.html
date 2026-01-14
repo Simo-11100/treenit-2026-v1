@@ -269,7 +269,7 @@
     <!-- Weekly insight -->
     <div id="insightSection" style="margin-top:16px; display:none;">
       <div class="section-title">💡 Viikon palaute</div>
-      <div id="insightText" style="background:#f0f4f9; padding:12px; border-radius:10px; font-size:14px; line-height:1.5; color:#333;"></div>
+      <div id="insightText" style="background:#f0f4f9; padding:12px; border-radius:10px; font-size:14px; line-height:1.5; color:#333; white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; word-break:break-word;"></div>
     </div>
 
     <!-- Totals -->
@@ -434,12 +434,7 @@
       // Weekly insight
       const insightSection = $('insightSection');
       const insightText = $('insightText');
-      const insight = s.weeklyInsight || '';
-      if (insight && insight.trim()) {
-        insightText.textContent = insight;
-      } else {
-        insightText.textContent = 'Ei uutta palautetta tänään.';
-      }
+      insightText.textContent = (s.weeklyInsight && String(s.weeklyInsight).trim()) ? s.weeklyInsight : 'Ei uutta palautetta tänään.';
       insightSection.style.display = 'block';
 
       // Year grid - käytä s.yearWeeks
