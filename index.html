@@ -113,15 +113,15 @@
     /* Recent weeks mini bars */
     .recent-weeks { margin-top: 12px; }
     .recent-weeks-title { font-size: 12px; color: #666; margin-bottom: 6px; }
-    .recent-bars { display: flex; gap: 4px; align-items: flex-end; height: 40px; }
-    .recent-bar {
-      flex: 1; background: #4285f4; border-radius: 2px 2px 0 0; min-height: 2px;
-      position: relative;
+    .recent-bars { display: flex; gap: 4px; align-items: flex-end; height: 50px; }
+    .recent-bar-wrap {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
     }
-    .recent-bar:hover::after {
-      content: attr(data-tip); position: absolute; bottom: 100%; left: 50%;
-      transform: translateX(-50%); background: #333; color: white;
-      padding: 2px 6px; border-radius: 4px; font-size: 10px; white-space: nowrap;
+    .recent-bar {
+      width: 100%; background: #4285f4; border-radius: 2px 2px 0 0; min-height: 2px;
+    }
+    .recent-bar-label {
+      font-size: 9px; color: #666; margin-top: 2px; text-align: center;
     }
 
     /* Year heatmap */
@@ -388,14 +388,22 @@
       const rw = s.recentWeeks || [];
       const maxMin = Math.max(...rw.map(x => x.minutes || 0), 1);
       rw.forEach(week => {
+        const wrap = document.createElement('div');
+        wrap.className = 'recent-bar-wrap';
+        
         const bar = document.createElement('div');
         bar.className = 'recent-bar';
         const mins = week.minutes ?? 0;
         const h = Math.max(2, Math.round((mins / maxMin) * 38));
         bar.style.height = h + 'px';
-        const label = week.weekKey || week.weekStart || '-';
-        bar.setAttribute('data-tip', `${label}: ${mins} min`);
-        recentBars.appendChild(bar);
+        
+        const label = document.createElement('div');
+        label.className = 'recent-bar-label';
+        label.textContent = mins;
+        
+        wrap.appendChild(bar);
+        wrap.appendChild(label);
+        recentBars.appendChild(wrap);
       });
 
       // Monthly - käytä s.monthly objektia
