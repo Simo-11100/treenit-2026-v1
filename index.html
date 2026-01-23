@@ -251,6 +251,9 @@
         <button type="button" style="background:#c084fc; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(-0.05)">−50 g</button>
       </div>
       
+      <label>Päivä</label>
+      <input id="weightDate" type="date" required />
+      
       <button type="button" onclick="resetWeight()" style="margin-top: 8px; background: #9aa0a6; font-size: 13px; padding: 8px;">Nollaa</button>
       
       <button type="button" id="saveWeightBtn" style="background: #7c3aed;">Tallenna paino</button>
@@ -523,6 +526,7 @@
 
     loadSecret();
     $('date').valueAsDate = new Date();
+    $('weightDate').valueAsDate = new Date();
 
     // Weight tracking
     let currentWeight = 0;
@@ -550,6 +554,7 @@
     saveWeightBtn.addEventListener('click', async () => {
       const secret = secretInput.value.trim();
       const user = getSelectedUser();
+      const weightDateValue = $('weightDate').value;
 
       if (!secret) {
         weightStatus.textContent = 'Syötä salasana ensin';
@@ -558,6 +563,11 @@
       }
       if (!user) {
         weightStatus.textContent = 'Valitse käyttäjä ensin';
+        weightStatus.className = 'status error';
+        return;
+      }
+      if (!weightDateValue) {
+        weightStatus.textContent = 'Valitse päivä';
         weightStatus.className = 'status error';
         return;
       }
@@ -575,7 +585,8 @@
         secret: secret,
         action: 'saveWeight',
         user: user,
-        weight: currentWeight
+        weight: currentWeight,
+        date: weightDateValue
       };
 
       try {
