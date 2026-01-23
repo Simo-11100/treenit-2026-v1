@@ -225,6 +225,44 @@
       <button type="submit">Tallenna</button>
     </form>
 
+    <!-- Weight tracking section -->
+    <div style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #e5e5e5;">
+      <div style="font-size: 15px; font-weight: 600; margin-bottom: 10px;">⚖️ Painonseuranta</div>
+      <div class="small" style="margin-bottom: 10px;">Tallenna paino ja saat Gemini-analyysin kehityksestäsi</div>
+      
+      <div id="weightDisplay" style="text-align: center; font-size: 28px; font-weight: 700; color: #7c3aed; padding: 12px; background: #f3e8ff; border-radius: 12px; margin-bottom: 12px;">0,00 kg</div>
+      
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px;">
+        <button type="button" class="btn-plus" onclick="addWeight(10)">+10 kg</button>
+        <button type="button" class="btn-plus" onclick="addWeight(5)">+5 kg</button>
+        <button type="button" class="btn-plus" onclick="addWeight(1)">+1 kg</button>
+        <button type="button" class="btn-plus" onclick="addWeight(0.5)">+500 g</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px;">
+        <button type="button" class="btn-minus" onclick="addWeight(-10)">−10 kg</button>
+        <button type="button" class="btn-minus" onclick="addWeight(-5)">−5 kg</button>
+        <button type="button" class="btn-minus" onclick="addWeight(-1)">−1 kg</button>
+        <button type="button" class="btn-minus" onclick="addWeight(-0.5)">−500 g</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+        <button type="button" style="background:#a855f7; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(0.1)">+100 g</button>
+        <button type="button" style="background:#a855f7; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(0.05)">+50 g</button>
+        <button type="button" style="background:#c084fc; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(-0.1)">−100 g</button>
+        <button type="button" style="background:#c084fc; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(-0.05)">−50 g</button>
+      </div>
+      
+      <button type="button" onclick="resetWeight()" style="margin-top: 8px; background: #9aa0a6; font-size: 13px; padding: 8px;">Nollaa</button>
+      
+      <button type="button" id="saveWeightBtn" style="background: #7c3aed;">Tallenna paino</button>
+      
+      <div id="weightStatus" class="status" style="margin-top: 10px;"></div>
+      
+      <div id="weightAnalysis" style="display: none; margin-top: 12px; padding: 14px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #7dd3fc; border-radius: 12px;">
+        <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">🤖 Gemini-analyysi</div>
+        <div id="weightAnalysisText" style="font-size: 14px; line-height: 1.6; color: #333; white-space: pre-wrap;"></div>
+      </div>
+    </div>
+
     <div id="status" class="status"></div>
 
     <!-- Meme/surprise -->
@@ -485,6 +523,91 @@
 
     loadSecret();
     $('date').valueAsDate = new Date();
+
+    // Weight tracking
+    let currentWeight = 0;
+    const weightDisplay = $('weightDisplay');
+    const saveWeightBtn = $('saveWeightBtn');
+    const weightStatus = $('weightStatus');
+    const weightAnalysis = $('weightAnalysis');
+    const weightAnalysisText = $('weightAnalysisText');
+
+    function updateWeightDisplay() {
+      weightDisplay.textContent = currentWeight.toFixed(2).replace('.', ',') + ' kg';
+    }
+
+    function addWeight(amount) {
+      currentWeight = Math.max(0, currentWeight + amount);
+      currentWeight = Math.round(currentWeight * 100) / 100; // Round to 2 decimals
+      updateWeightDisplay();
+    }
+
+    function resetWeight() {
+      currentWeight = 0;
+      updateWeightDisplay();
+    }
+
+    saveWeightBtn.addEventListener('click', async () => {
+      const secret = secretInput.value.trim();
+      const user = getSelectedUser();
+
+      if (!secret) {
+        weightStatus.textContent = 'Syötä salasana ensin';
+        weightStatus.className = 'status error';
+        return;
+      }
+      if (!user) {
+        weightStatus.textContent = 'Valitse käyttäjä ensin';
+        weightStatus.className = 'status error';
+        return;
+      }
+      if (currentWeight < 30 || currentWeight > 300) {
+        weightStatus.textContent = 'Syötä paino (30-300 kg)';
+        weightStatus.className = 'status error';
+        return;
+      }
+
+      weightStatus.textContent = 'Tallennetaan ja analysoidaan...';
+      weightStatus.className = 'status';
+      weightAnalysis.style.display = 'none';
+
+      const payload = {
+        secret: secret,
+        action: 'saveWeight',
+        user: user,
+        weight: currentWeight
+      };
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+
+        if (!json.ok) {
+          weightStatus.textContent = 'Virhe: ' + (json.error || 'Tuntematon virhe');
+          weightStatus.className = 'status error';
+          return;
+        }
+
+        saveSecret(secret);
+        weightStatus.textContent = 'Paino tallennettu!';
+        weightStatus.className = 'status success';
+
+        if (json.analysis) {
+          weightAnalysisText.textContent = json.analysis;
+          weightAnalysis.style.display = 'block';
+        }
+
+        resetWeight();
+
+      } catch (err) {
+        weightStatus.textContent = 'Verkkovirhe: ' + err.message;
+        weightStatus.className = 'status error';
+      }
+    });
 
     f.addEventListener('submit', async (ev) => {
       ev.preventDefault();
