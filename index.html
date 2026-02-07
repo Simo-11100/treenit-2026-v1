@@ -272,7 +272,7 @@
     <div id="memeWrap" class="memeWrap">
       <div class="memeTitle">🎉 Yllätys!</div>
       <div id="memeText"></div>
-      <img id="memeImg" alt="meme" style="display:none;" />
+      <img id="memeImg" alt="meme" style="display:none;" onerror="this.style.display='none'; $('memeText').textContent='(Kuva ei latautunut)'; $('memeText').style.display='block';" />
     </div>
   </div>
 
