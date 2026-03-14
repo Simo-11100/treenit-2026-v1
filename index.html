@@ -564,6 +564,7 @@
           <span class="spin-icon" id="refreshIcon">↻</span> Päivitä
         </button>
       </div>
+      <div id="tilastotStatus" class="status-msg"></div>
       <div class="progress-wrap">
         <div class="progress-header">
           <span id="weekLabel"  class="progress-title">–</span>
@@ -688,6 +689,7 @@
           <span class="spin-icon" id="refreshIcon2">↻</span> Päivitä
         </button>
       </div>
+      <div id="profiiliStatus" class="status-msg"></div>
       <div id="profileEmpty" class="no-data">Ei dataa — paina&nbsp;↻&nbsp;Päivitä</div>
       <div id="profileData" style="display:none;">
         <div class="totals-grid">
@@ -1278,6 +1280,7 @@
     renderCalendar(yw, ad, rd, lrec);
   }
 
+  
   // Laskee paikalliset suositukset tavoitteen pohjalta (fallback ennen Geminiä)
   function calcLocalRecommendations() {
     const goal    = goalWeekVal;
@@ -1457,11 +1460,26 @@
   });
 
   // ── GET refresh ────────────────────────────────────────────────────
+  function setRefreshMsg(txt, type) {
+    // Näyttää viestin molemmilla sivuilla — kumpi on auki, se näkyy
+    ['tilastotStatus', 'profiiliStatus'].forEach(id => setMsg(id, txt, type));
+    // Myös Asetukset-sivun indikaattori
+    const gs_ = $('getStatus');
+    if (!gs_) return;
+    if (type === 'success') { gs_.textContent = '✓ Toimii';    gs_.className = 'setting-value chip-ok';  }
+    else                    { gs_.textContent = '✗ Ei tuettu'; gs_.className = 'setting-value chip-err'; }
+  }
+
   async function refreshStats() {
     const secret = gs(), user = gu();
-    if (!secret || !user) { showView('asetukset'); return; }
+    if (!secret || !user) {
+      setRefreshMsg('⚠️ Kirjaudu ensin (Asetukset)', 'error');
+      showView('asetukset'); return;
+    }
 
     [$('refreshBtn'), $('refreshBtn2')].forEach(b => b && b.classList.add('spinning'));
+    setRefreshMsg('Ladataan…', 'loading');
+
     try {
       const url = new URL(API_URL);
       url.searchParams.set('secret', secret);
@@ -1469,18 +1487,47 @@
       url.searchParams.set('action', 'getStats');
 
       const res  = await fetch(url.toString());
+
+      // Apps Script saattaa palauttaa HTML-virhesivun jos doGet puuttuu
+      const ct = res.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        throw new Error('no-get-support');
+      }
+
       const json = await res.json();
       if (json.ok && json.saved) {
         cached = json.saved;
         renderAll(json.saved);
-        $('getStatus').textContent = '✓ Toimii'; $('getStatus').className = 'setting-value chip-ok';
+        setRefreshMsg(`✓ Päivitetty — ${json.saved.totalCount ?? 0} suoritusta`, 'success');
+        setTimeout(() => setRefreshMsg('', ''), 3000);
       } else {
-        $('getStatus').textContent = '✗ Ei tuettu'; $('getStatus').className = 'setting-value chip-err';
-        renderCached();
+        // Backend vastasi JSON:lla mutta ok=false
+        if (cached) {
+          renderAll(cached);
+          setRefreshMsg('ℹ️ Backend ei tue vielä GET-pyyntöä — näytetään välimuisti', 'loading');
+        } else {
+          setRefreshMsg('ℹ️ Backend ei tue vielä GET-pyyntöä — kirjaa suoritus ensin', 'loading');
+        }
       }
-    } catch (_) {
-      $('getStatus').textContent = '✗ Virhe'; $('getStatus').className = 'setting-value chip-err';
-      renderCached();
+    } catch (err) {
+      // Verkkovirhe tai ei-JSON-vastaus (doGet puuttuu backendistä)
+      const noSupport = err.message === 'no-get-support';
+      if (cached) {
+        renderAll(cached);
+        setRefreshMsg(
+          noSupport
+            ? 'ℹ️ GET-tuki puuttuu backendistä — näytetään edellinen data'
+            : `⚠️ Verkkovirhe — näytetään edellinen data`,
+          'loading'
+        );
+      } else {
+        setRefreshMsg(
+          noSupport
+            ? 'ℹ️ GET-tuki puuttuu backendistä — kirjaa suoritus ensin'
+            : `⚠️ Verkkovirhe: ${err.message}`,
+          noSupport ? 'loading' : 'error'
+        );
+      }
     } finally {
       [$('refreshBtn'), $('refreshBtn2')].forEach(b => b && b.classList.remove('spinning'));
     }
