@@ -7,672 +7,1507 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Treenit" />
-  <title>Suoritukset 2026</title>
+  <title>Treenit 2026</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icon-192.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon-192.svg" />
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 12px; background: #f5f5f5; }
-    .card { max-width: 520px; margin: 0 auto; padding: 14px; border: 1px solid #e5e5e5; border-radius: 16px; background: white; margin-bottom: 12px; }
-    label { display: block; margin-top: 10px; font-size: 13px; color: #333; font-weight: 500; }
-    input, select, textarea, button {
+    /* ── RESET ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #f0f4f8;
+      min-height: 100vh;
+      padding-bottom: 68px;
+    }
+
+    /* ── HEADER ────────────────────────────── */
+    .app-header {
+      background: #4285f4; color: white;
+      padding: 13px 16px 10px;
+      display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 2px 10px rgba(66,133,244,.35);
+    }
+    .app-title { font-size: 17px; font-weight: 700; }
+    .app-sub   { font-size: 11px; opacity: .8; margin-top: 2px; }
+    .user-badge {
+      background: rgba(255,255,255,.18); border: 1.5px solid rgba(255,255,255,.5);
+      color: white; border-radius: 20px; padding: 5px 14px;
+      font-size: 13px; font-weight: 700; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .user-badge:active { background: rgba(255,255,255,.32); }
+
+    /* ── BOTTOM NAV ─────────────────────────── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white; border-top: 1px solid #e0e0e0;
+      display: flex; z-index: 200;
+      box-shadow: 0 -2px 14px rgba(0,0,0,.08);
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 8px 0 6px;
+      cursor: pointer; color: #9aa0a6;
+      font-size: 10px; font-weight: 500;
+      border: none; background: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: color .15s;
+    }
+    .nav-btn.active { color: #4285f4; }
+    .nav-icon { font-size: 22px; line-height: 1; margin-bottom: 2px; }
+
+    /* ── VIEWS ──────────────────────────────── */
+    .view { display: none; padding: 12px; }
+    .view.active { display: block; }
+
+    /* ── CARD ───────────────────────────────── */
+    .card {
+      background: white; border-radius: 16px;
+      border: 1px solid #e5e5e5; padding: 16px; margin-bottom: 12px;
+    }
+    .card-title {
+      font-size: 15px; font-weight: 700; color: #1a1a1a;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .card-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .card-row .card-title { margin-bottom: 0; }
+
+    /* ── FORM ELEMENTS ──────────────────────── */
+    .field-label {
+      display: block; margin-top: 12px;
+      font-size: 13px; color: #555; font-weight: 600;
+    }
+    input[type="text"], input[type="password"],
+    input[type="date"], input[type="number"], select, textarea {
       width: 100%; margin-top: 5px;
-      padding: 11px; font-size: 16px; border-radius: 10px; border: 1px solid #ddd;
+      padding: 11px; font-size: 16px;
+      border-radius: 10px; border: 1.5px solid #ddd;
+      background: #fafafa; font-family: inherit;
     }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: #4285f4; }
-    textarea { min-height: 70px; resize: vertical; }
-    button { margin-top: 12px; cursor: pointer; background: #4285f4; color: white; border: none; font-weight: 600; }
-    button:active { background: #3367d6; }
-    .status { margin-top: 10px; font-size: 14px; }
-    .status.error { color: #d93025; }
-    .status.success { color: #1e8e3e; }
-    
-    /* Meme/surprise */
-    .memeWrap { margin-top: 12px; display: none; padding: 14px; background: #fffbeb; border: 2px solid #fbbf24; border-radius: 14px; }
-    .memeWrap img { width: 100%; border-radius: 10px; margin-top: 8px; }
-    .memeTitle { font-size: 15px; font-weight: 600; }
-    #memeText { margin-top: 8px; font-size: 14px; line-height: 1.4; color: #333; }
-    
-    .small { color: #666; font-size: 11px; margin-top: 4px; }
-    .secret-row { display: flex; gap: 8px; align-items: flex-end; }
-    .secret-row > div:first-child { flex: 1; }
-    .secret-saved { font-size: 10px; color: #1e8e3e; margin-top: 3px; }
-    
-    /* User select */
-    .user-select { display: flex; gap: 10px; margin-top: 6px; }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: #4285f4; background: white;
+    }
+    textarea { min-height: 68px; resize: vertical; }
+
+    /* ── BUTTONS ────────────────────────────── */
+    .btn {
+      display: block; width: 100%; padding: 13px;
+      font-size: 15px; border-radius: 10px; border: none;
+      cursor: pointer; font-weight: 700; margin-top: 12px;
+      -webkit-tap-highlight-color: transparent;
+      transition: filter .15s; font-family: inherit;
+    }
+    .btn:active { filter: brightness(.9); }
+    .btn-primary { background: #4285f4; color: white; }
+    .btn-purple  { background: #7c3aed; color: white; }
+    .btn-gray    { background: #9aa0a6; color: white; font-size: 13px; padding: 9px; }
+    .btn-sm {
+      display: inline-block; padding: 9px 16px;
+      font-size: 13px; border-radius: 9px; border: none;
+      cursor: pointer; font-weight: 700; margin-top: 0;
+      font-family: inherit; -webkit-tap-highlight-color: transparent;
+    }
+    .btn-sm:active { filter: brightness(.9); }
+
+    /* ── STATUS MESSAGES ────────────────────── */
+    .status-msg {
+      display: none; margin-top: 10px;
+      font-size: 14px; padding: 9px 12px; border-radius: 9px;
+    }
+    .status-msg.error   { display: block; background: #fce8e6; color: #c5221f; }
+    .status-msg.success { display: block; background: #e6f4ea; color: #1e8e3e; }
+    .status-msg.loading { display: block; background: #e8f0fe; color: #1a73e8; }
+
+    /* ── USER SELECT ────────────────────────── */
+    .user-select { display: flex; gap: 10px; margin-top: 8px; }
+    .user-select .us-radio { display: none; }
     .user-select label {
-      flex: 1; margin: 0; padding: 12px;
-      border: 2px solid #ddd; border-radius: 10px;
-      text-align: center; font-size: 15px; font-weight: 500; cursor: pointer;
+      flex: 1; padding: 14px;
+      border: 2px solid #ddd; border-radius: 12px;
+      text-align: center; font-size: 16px; font-weight: 700;
+      cursor: pointer; color: #555;
+      transition: border-color .15s, background .15s;
     }
-    .user-select input[type="radio"] { display: none; }
-    .user-select input[type="radio"]:checked + label {
+    .user-select .us-radio:checked + label {
       border-color: #4285f4; background: #e8f0fe; color: #1a73e8;
     }
 
-    /* Tag select */
-    .tag-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+    /* ── TAG SELECT ─────────────────────────── */
+    .tag-select { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+    .tag-select .ts-radio { display: none; }
     .tag-select label {
-      margin: 0; padding: 10px 6px;
+      padding: 10px 5px;
       border: 2px solid #ddd; border-radius: 10px;
-      text-align: center; font-size: 13px; font-weight: 500; cursor: pointer;
+      text-align: center; font-size: 13px; font-weight: 500;
+      cursor: pointer; color: #555;
+      transition: border-color .15s, background .15s;
     }
-    .tag-select input[type="radio"] { display: none; }
-    .tag-select input[type="radio"]:checked + label {
-      border-color: #34a853; background: #e6f4ea; color: #1e8e3e;
+    .tag-select .ts-radio:checked + label {
+      border-color: #34a853; background: #e6f4ea; color: #188038;
     }
 
-    /* Minutes */
-    .minutes-section { margin-top: 14px; }
-    .minutes-display {
-      text-align: center; font-size: 26px; font-weight: 700; color: #1a73e8;
-      padding: 10px; background: #e8f0fe; border-radius: 10px; margin: 6px 0 10px 0;
+    /* ── STEPPERS ───────────────────────────── */
+    .big-display {
+      text-align: center; font-size: 30px; font-weight: 800;
+      padding: 12px; border-radius: 12px; margin: 8px 0 10px;
+      letter-spacing: -.5px;
     }
-    .minutes-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    .minutes-buttons button {
-      margin: 0; padding: 12px 6px; font-size: 13px; font-weight: 600; border-radius: 8px;
+    .minutes-display { color: #1a73e8; background: #e8f0fe; }
+    .weight-display  { color: #7c3aed; background: #f3e8ff; }
+    .step-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .step-grid button {
+      padding: 11px 5px; font-size: 13px; font-weight: 700;
+      border-radius: 8px; border: none; cursor: pointer;
+      -webkit-tap-highlight-color: transparent; font-family: inherit;
+      transition: filter .12s;
     }
-    .btn-plus { background: #34a853; color: white; }
-    .btn-plus:active { background: #2d8f47; }
+    .step-grid button:active { filter: brightness(.88); }
+    .btn-plus  { background: #34a853; color: white; }
     .btn-minus { background: #ea4335; color: white; }
-    .btn-minus:active { background: #c5352a; }
-    .minutes-reset { margin-top: 6px; background: #9aa0a6; font-size: 13px; padding: 8px; }
+    .btn-wt    { background: #a855f7; color: white; }
+    .btn-wtm   { background: #c084fc; color: white; }
 
-    /* Report sections */
-    .report-section { display: none; }
-    .section-title { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 10px; }
-    
-    /* Totals */
-    .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+    /* ── PROGRESS BAR ───────────────────────── */
+    .progress-wrap { margin: 6px 0 14px; }
+    .progress-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+    .progress-title  { font-weight: 600; color: #333; }
+    .progress-nums   { color: #666; font-size: 12px; }
+    .progress-track  { height: 11px; background: #e8eaf0; border-radius: 6px; overflow: hidden; }
+    .progress-fill   { height: 100%; background: #34a853; border-radius: 6px; transition: width .4s ease; }
+    .progress-fill.over { background: #fbbc04; }
+    .progress-fill.done { background: #4285f4; }
+    .progress-sub    { font-size: 11px; color: #888; margin-top: 4px; }
+
+    /* ── SUMMARY STATS ───────────────────────── */
+    .stats-3 {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-bottom: 14px;
+    }
+    .stat-box {
+      background: #f8f9fa; border-radius: 10px;
+      padding: 10px 6px; text-align: center;
+      border: 1px solid #e8eaf0;
+    }
+    .stat-val { font-size: 19px; font-weight: 800; color: #1a73e8; }
+    .stat-lbl { font-size: 10px; color: #888; margin-top: 2px; line-height: 1.3; }
+
+    /* ── TOTALS GRID ─────────────────────────── */
+    .totals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
     .total-box {
-      background: #f8f9fa; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #e0e0e0;
+      background: #f0f4ff; padding: 14px;
+      border-radius: 12px; text-align: center;
+      border: 1px solid #d0dcff;
     }
-    .total-value { font-size: 22px; font-weight: 700; color: #1a73e8; }
-    .total-label { font-size: 11px; color: #666; margin-top: 2px; }
-    
-    /* Per tag list */
-    .per-tag-list { display: flex; flex-direction: column; gap: 5px; }
-    .per-tag-item {
+    .total-value { font-size: 28px; font-weight: 800; color: #1a73e8; }
+    .total-label { font-size: 11px; color: #777; margin-top: 2px; font-weight: 500; }
+
+    /* ── SPORT DISTRIBUTION ──────────────────── */
+    .dist-item { margin-bottom: 10px; }
+    .dist-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 3px; }
+    .dist-name   { font-weight: 600; color: #333; }
+    .dist-vals   { color: #888; font-size: 11px; }
+    .dist-track  { height: 9px; background: #e8eaf0; border-radius: 5px; overflow: hidden; }
+    .dist-fill   { height: 100%; border-radius: 5px; transition: width .4s; }
+    .dist-pct    { font-size: 10px; color: #666; margin-top: 2px; }
+
+    /* ── BAR CHART (8 weeks) ─────────────────── */
+    .bars-outer {
+      position: relative;
+      padding: 18px 0 24px;
+    }
+    .bars-chart { display: flex; gap: 5px; align-items: flex-end; height: 80px; position: relative; }
+    .bar-col    { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+    .bar-body   {
+      width: 100%; background: #4285f4;
+      border-radius: 3px 3px 0 0; min-height: 3px; position: relative;
+    }
+    .bar-body.cw  { background: #34a853; }
+    .bar-body.low { background: #ea4335; }
+    .bar-val {
+      position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+      font-size: 9px; font-weight: 700; color: #333; white-space: nowrap;
+    }
+    .bar-wk-labels { display: flex; gap: 5px; position: absolute; bottom: 4px; left: 0; right: 0; }
+    .bar-wk-lbl    { flex: 1; text-align: center; font-size: 9px; color: #999; }
+    .bar-wk-lbl.active { font-weight: 700; color: #34a853; }
+    .goal-line { position: absolute; left: 0; right: 0; border-top: 2px dashed rgba(251,188,4,.85); pointer-events: none; }
+    .goal-tag  { position: absolute; right: 0; font-size: 9px; font-weight: 700; color: #b8860b; }
+
+    /* ── HEATMAP ─────────────────────────────── */
+    .heatmap-scroll { overflow-x: auto; padding-bottom: 4px; }
+    .heatmap-row    { display: flex; gap: 2px; align-items: flex-start; }
+    .heatmap-col-wrap { display: flex; flex-direction: column; align-items: center; }
+    .hm-cell {
+      width: 14px; height: 14px; border-radius: 2px;
+      background: #e8eaf0; cursor: default; position: relative; flex-shrink: 0;
+    }
+    .hm-cell:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,.75); color: white;
+      font-size: 10px; white-space: nowrap;
+      padding: 3px 7px; border-radius: 5px;
+      pointer-events: none; z-index: 50;
+    }
+    .hm-cell.l1 { background: #fef3c7; }
+    .hm-cell.l2 { background: #fcd34d; }
+    .hm-cell.l3 { background: #f97316; }
+    .hm-cell.l4 { background: #22c55e; }
+    .hm-cell.l5 { background: #15803d; }
+    .hm-cell.cw { outline: 2px solid #4285f4; outline-offset: 1px; }
+    .hm-wk-num  {
+      height: 11px; line-height: 11px; font-size: 8px;
+      color: transparent; text-align: center; width: 14px; margin-top: 2px;
+    }
+    .hm-wk-num.show { color: #888; font-weight: 700; }
+    .hm-legend { display: flex; align-items: center; gap: 7px; margin-top: 10px; font-size: 10px; color: #777; flex-wrap: wrap; }
+    .hm-leg    { display: flex; align-items: center; gap: 3px; }
+    .hm-leg-box { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+
+    /* ── INSIGHT BOX ─────────────────────────── */
+    .insight-box {
+      background: linear-gradient(135deg,#f0f4ff,#e8f0fe);
+      border: 1px solid #c5d8fb; border-radius: 12px;
+      padding: 14px; font-size: 14px; line-height: 1.65; color: #333;
+    }
+
+    /* ── WEIGHT ANALYSIS ─────────────────────── */
+    .analysis-box {
+      background: linear-gradient(135deg,#f0f9ff,#e8f5e9);
+      border: 1px solid #7dd3fc; border-radius: 12px;
+      padding: 14px; margin-top: 12px;
+      font-size: 14px; line-height: 1.65; color: #333;
+    }
+
+    /* ── MEME ────────────────────────────────── */
+    .meme-box {
+      display: none; padding: 14px;
+      background: #fffbeb; border: 2px solid #fbbf24;
+      border-radius: 14px; margin-top: 12px;
+    }
+    .meme-box img { width: 100%; border-radius: 10px; margin-top: 8px; }
+
+    /* ── REFRESH BUTTON ──────────────────────── */
+    .refresh-btn {
+      display: flex; align-items: center; gap: 6px;
+      background: #e8f0fe; color: #1a73e8;
+      border: 1.5px solid #c5d8fb; border-radius: 10px;
+      padding: 8px 14px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .refresh-btn:active { background: #d2e3fc; }
+    .spin-icon { display: inline-block; }
+    .refresh-btn.spinning .spin-icon { animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── EMPTY STATE ─────────────────────────── */
+    .no-data { text-align: center; color: #bbb; font-size: 14px; padding: 28px 0; }
+
+    /* ── STREAK ──────────────────────────────── */
+    .streak-box {
+      background: linear-gradient(135deg,#fff7ed,#ffedd5);
+      border: 2px solid #fed7aa; border-radius: 14px;
+      padding: 16px; text-align: center;
+    }
+    .streak-num { font-size: 52px; font-weight: 900; color: #ea580c; line-height: 1; }
+    .streak-lbl { font-size: 13px; color: #c2410c; margin-top: 6px; font-weight: 600; }
+    .streak-sub { font-size: 11px; color: #d97706; margin-top: 3px; }
+
+    /* ── RECORDS ─────────────────────────────── */
+    .record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .record-box  {
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 10px; padding: 10px 12px;
+    }
+    .record-val { font-size: 18px; font-weight: 800; color: #b45309; }
+    .record-lbl { font-size: 10px; color: #92400e; margin-top: 2px; line-height: 1.3; }
+    .record-icon { font-size: 18px; margin-bottom: 4px; }
+
+    /* ── GOAL SETTING ────────────────────────── */
+    .goal-display {
+      text-align: center; font-size: 26px; font-weight: 800;
+      padding: 14px 12px; border-radius: 12px; margin: 8px 0 10px;
+      letter-spacing: -.5px; transition: transform .1s;
+    }
+    .goal-display.bumped { transform: scale(1.07); }
+    .goal-week-display  { color: #0d7a3e; background: #d1fae5; }
+    .goal-month-display { color: #92400e; background: #fef3c7; }
+    .goal-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .goal-save-btn {
+      display: block; width: 100%; padding: 13px;
+      font-size: 15px; border-radius: 10px; border: none;
+      cursor: pointer; font-weight: 700; margin-top: 10px;
+      font-family: inherit; -webkit-tap-highlight-color: transparent;
+      transition: filter .15s;
+    }
+    .goal-save-btn:active { filter: brightness(.88); }
+    .goal-save-week  { background: #059669; color: white; }
+    .goal-save-month { background: #d97706; color: white; }
+
+    /* ── GOAL HISTORY ────────────────────────── */
+    .goal-hist-item {
       display: flex; justify-content: space-between; align-items: center;
-      background: #f8f9fa; padding: 8px 10px; border-radius: 8px; font-size: 13px;
+      padding: 9px 0; border-bottom: 1px solid #f2f2f2; font-size: 13px;
     }
-    .per-tag-name { font-weight: 500; }
-    .per-tag-stats { color: #666; font-size: 12px; }
+    .goal-hist-item:last-child { border-bottom: none; }
+    .goal-hist-left { display: flex; align-items: center; gap: 8px; }
+    .goal-hist-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px;
+      border-radius: 10px; white-space: nowrap;
+    }
+    .goal-hist-badge.week  { background: #d1fae5; color: #065f46; }
+    .goal-hist-badge.month { background: #fef3c7; color: #92400e; }
+    .goal-hist-val  { font-weight: 700; color: #333; }
+    .goal-hist-ts   { font-size: 11px; color: #aaa; }
 
-    /* Progress bar */
-    .progress-wrap { margin: 8px 0; }
-    .progress-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
-    .progress-title { font-weight: 500; }
-    .progress-nums { color: #666; }
-    .progress-bar { height: 8px; background: #e0e0e0; border-radius: 4px; overflow: hidden; }
-    .progress-fill { height: 100%; background: #34a853; border-radius: 4px; transition: width 0.3s; }
-    .progress-fill.over { background: #fbbf24; }
-    .progress-sub { font-size: 11px; color: #888; margin-top: 3px; }
+    /* ── ACTIVITY CALENDAR ───────────────────── */
+    .cal-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .cal-nav-btn {
+      background: #e8f0fe; color: #1a73e8; border: none;
+      border-radius: 8px; padding: 6px 12px; font-size: 16px;
+      cursor: pointer; font-weight: 700; font-family: inherit;
+    }
+    .cal-month-lbl { font-size: 14px; font-weight: 700; color: #333; }
+    .cal-day-names {
+      display: grid; grid-template-columns: repeat(7, 1fr);
+      gap: 2px; margin-bottom: 4px;
+    }
+    .cal-day-name {
+      font-size: 9px; text-align: center;
+      color: #aaa; font-weight: 600; padding: 2px 0;
+    }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-cell {
+      aspect-ratio: 1; border-radius: 6px;
+      font-size: 10px; display: flex; align-items: center;
+      justify-content: center; font-weight: 500;
+      color: #bbb; background: #f5f5f5;
+    }
+    .cal-cell.empty   { background: transparent; color: transparent; }
+    .cal-cell.active  { background: #22c55e; color: white; font-weight: 700; }
+    .cal-cell.active.l2 { background: #f97316; }
+    .cal-cell.active.l3 { background: #15803d; }
+    .cal-cell.today   { background: #4285f4; color: white; font-weight: 700; }
+    .cal-cell.rec {
+      background: #ede9fe; color: #5b21b6; font-weight: 700;
+      outline: 2px dashed #a78bfa; outline-offset: -2px;
+    }
+    .cal-cell.rec-gemini {
+      background: #fdf4ff; color: #86198f; font-weight: 700;
+      outline: 2px dashed #d946ef; outline-offset: -2px;
+    }
+    .cal-note         { font-size: 11px; color: #aaa; margin-top: 8px; text-align: center; }
+    .cal-legend {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-top: 10px; font-size: 10px; color: #666;
+    }
+    .cal-leg { display: flex; align-items: center; gap: 4px; }
+    .cal-leg-box {
+      width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+    }
 
-    /* Recent weeks mini bars */
-    .recent-weeks { margin-top: 12px; }
-    .recent-weeks-title { font-size: 12px; color: #666; margin-bottom: 6px; }
-    .recent-bars { display: flex; gap: 4px; align-items: flex-end; height: 50px; }
-    .recent-bar-wrap {
-      flex: 1; display: flex; flex-direction: column; align-items: center;
+    /* ── SETTINGS ────────────────────────────── */
+    .setting-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid #f2f2f2;
     }
-    .recent-bar {
-      width: 100%; background: #4285f4; border-radius: 2px 2px 0 0; min-height: 2px;
+    .setting-row:last-child { border-bottom: none; }
+    .setting-label { font-size: 14px; font-weight: 600; color: #333; }
+    .setting-sub   { font-size: 11px; color: #999; margin-top: 2px; }
+    .setting-value { font-size: 13px; font-weight: 700; }
+    .chip-ok  { color: #1e8e3e; }
+    .chip-err { color: #c5221f; }
+    .secret-saved-chip {
+      display: inline-block; font-size: 10px;
+      color: #1e8e3e; background: #e6f4ea;
+      border-radius: 10px; padding: 2px 8px; margin-top: 4px;
     }
-    .recent-bar-label {
-      font-size: 9px; color: #666; margin-top: 2px; text-align: center;
+    .setup-banner {
+      background: linear-gradient(135deg,#e8f0fe,#f0f4ff);
+      border: 1.5px solid #c5d8fb; border-radius: 14px;
+      padding: 18px 16px; margin-bottom: 12px; text-align: center;
     }
-
-    /* Year heatmap */
-    .year-section { margin-top: 14px; }
-    .year-title { font-size: 12px; color: #666; margin-bottom: 6px; }
-    .year-grid {
-      display: grid; grid-template-columns: repeat(26, 1fr); gap: 2px;
-    }
-    .year-cell {
-      aspect-ratio: 1; border-radius: 2px; background: #e0e0e0;
-    }
-    .year-cell.l1 { background: #fef3c7; }
-    .year-cell.l2 { background: #fcd34d; }
-    .year-cell.l3 { background: #f97316; }
-    .year-cell.l4 { background: #22c55e; }
-    .year-cell.l5 { background: #15803d; }
-    
-    /* Year legend */
-    .year-legend {
-      display: flex; align-items: center; gap: 4px; margin-top: 8px; font-size: 10px; color: #666;
-      flex-wrap: wrap;
-    }
-    .year-legend-item {
-      display: flex; align-items: center; gap: 2px;
-    }
-    .year-legend-box {
-      width: 12px; height: 12px; border-radius: 2px;
-    }
-    .year-legend-box.l0 { background: #e0e0e0; }
-    .year-legend-box.l1 { background: #fef3c7; }
-    .year-legend-box.l2 { background: #fcd34d; }
-    .year-legend-box.l3 { background: #f97316; }
-    .year-legend-box.l4 { background: #22c55e; }
-    .year-legend-box.l5 { background: #15803d; }
+    .setup-title { font-size: 16px; font-weight: 700; color: #1a73e8; margin-bottom: 6px; }
+    .setup-sub   { font-size: 13px; color: #666; line-height: 1.5; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <div style="font-size:17px; font-weight:600;">Suoritukset 2026</div>
-    <div class="small">Kirjaa suoritus</div>
 
-    <form id="f">
-      <div class="secret-row">
-        <div>
-          <label>Salasana</label>
-          <input id="secret" type="password" placeholder="Syötä salasana" required />
-          <div id="secretSaved" class="secret-saved" style="display:none;">✓ Tallennettu</div>
-        </div>
-      </div>
+  <!-- ════════════ HEADER ════════════ -->
+  <header class="app-header">
+    <div>
+      <div class="app-title">🏋️ Treenit 2026</div>
+      <div class="app-sub" id="headerSub">Kirjaudu ensin →</div>
+    </div>
+    <button class="user-badge" id="headerBadge" onclick="showView('asetukset')">–</button>
+  </header>
 
-      <label>Käyttäjä</label>
-      <div class="user-select">
-        <input type="radio" id="userSmonde" name="user" value="Smonde" required />
-        <label for="userSmonde">Smonde</label>
-        <input type="radio" id="userLormy" name="user" value="Lörmy" />
-        <label for="userLormy">Lörmy</label>
-      </div>
 
-      <label>Laji</label>
-      <div class="tag-select">
-        <input type="radio" id="tagKuntosali" name="tag" value="Kuntosali" required />
-        <label for="tagKuntosali">🏋️ Kuntosali</label>
-        <input type="radio" id="tagJuoksu" name="tag" value="Juoksu" />
-        <label for="tagJuoksu">🏃 Juoksu</label>
-        <input type="radio" id="tagUinti" name="tag" value="Uinti" />
-        <label for="tagUinti">🏊 Uinti</label>
-        <input type="radio" id="tagKuntopiiri" name="tag" value="Kuntopiiri" />
-        <label for="tagKuntopiiri">🔄 Kuntopiiri</label>
-        <input type="radio" id="tagJooga" name="tag" value="Jooga" />
-        <label for="tagJooga">🧘 Jooga</label>
-        <input type="radio" id="tagPyoraily" name="tag" value="Pyöräily" />
-        <label for="tagPyoraily">🚴 Pyöräily</label>
-        <input type="radio" id="tagSalibandy" name="tag" value="Salibandy" />
-        <label for="tagSalibandy">🏑 Salibandy</label>
-      </div>
+  <!-- ════════════ VIEW: ASETUKSET (etusivu jos ei kirjautunut) ════════════ -->
+  <div id="view-asetukset" class="view">
 
-      <label>Päivä</label>
-      <input id="date" type="date" required />
-
-      <div class="minutes-section">
-        <label>Kesto (min)</label>
-        <div id="minutesDisplay" class="minutes-display">0 min</div>
-        <div class="minutes-buttons">
-          <button type="button" class="btn-plus" onclick="addMinutes(1)">+1</button>
-          <button type="button" class="btn-plus" onclick="addMinutes(5)">+5</button>
-          <button type="button" class="btn-plus" onclick="addMinutes(10)">+10</button>
-          <button type="button" class="btn-plus" onclick="addMinutes(15)">+15</button>
-        </div>
-        <div class="minutes-buttons" style="margin-top:6px;">
-          <button type="button" class="btn-minus" onclick="addMinutes(-1)">−1</button>
-          <button type="button" class="btn-minus" onclick="addMinutes(-5)">−5</button>
-          <button type="button" class="btn-minus" onclick="addMinutes(-10)">−10</button>
-          <button type="button" class="btn-minus" onclick="addMinutes(-15)">−15</button>
-        </div>
-        <button type="button" class="minutes-reset" onclick="resetMinutes()">Nollaa</button>
-      </div>
-
-      <label>Huomio (valinnainen)</label>
-      <textarea id="note" placeholder="Esim. 5 km, hyvä fiilis..."></textarea>
-
-      <button type="submit">Tallenna</button>
-    </form>
-
-    <!-- Weight tracking section -->
-    <div style="margin-top: 20px; padding-top: 16px; border-top: 2px solid #e5e5e5;">
-      <div style="font-size: 15px; font-weight: 600; margin-bottom: 10px;">⚖️ Painonseuranta</div>
-      <div class="small" style="margin-bottom: 10px;">Tallenna paino ja saat Gemini-analyysin kehityksestäsi</div>
-      
-      <div id="weightDisplay" style="text-align: center; font-size: 28px; font-weight: 700; color: #7c3aed; padding: 12px; background: #f3e8ff; border-radius: 12px; margin-bottom: 12px;">0,00 kg</div>
-      
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px;">
-        <button type="button" class="btn-plus" onclick="addWeight(10)">+10 kg</button>
-        <button type="button" class="btn-plus" onclick="addWeight(5)">+5 kg</button>
-        <button type="button" class="btn-plus" onclick="addWeight(1)">+1 kg</button>
-        <button type="button" class="btn-plus" onclick="addWeight(0.5)">+500 g</button>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 6px;">
-        <button type="button" class="btn-minus" onclick="addWeight(-10)">−10 kg</button>
-        <button type="button" class="btn-minus" onclick="addWeight(-5)">−5 kg</button>
-        <button type="button" class="btn-minus" onclick="addWeight(-1)">−1 kg</button>
-        <button type="button" class="btn-minus" onclick="addWeight(-0.5)">−500 g</button>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
-        <button type="button" style="background:#a855f7; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(0.1)">+100 g</button>
-        <button type="button" style="background:#a855f7; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(0.05)">+50 g</button>
-        <button type="button" style="background:#c084fc; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(-0.1)">−100 g</button>
-        <button type="button" style="background:#c084fc; color:white; margin:0; padding:10px 6px; font-size:12px; border-radius:8px;" onclick="addWeight(-0.05)">−50 g</button>
-      </div>
-      
-      <label>Päivä</label>
-      <input id="weightDate" type="date" required />
-      
-      <button type="button" onclick="resetWeight()" style="margin-top: 8px; background: #9aa0a6; font-size: 13px; padding: 8px;">Nollaa</button>
-      
-      <button type="button" id="saveWeightBtn" style="background: #7c3aed;">Tallenna paino</button>
-      
-      <div id="weightStatus" class="status" style="margin-top: 10px;"></div>
-      
-      <div id="weightAnalysis" style="display: none; margin-top: 12px; padding: 14px; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border: 1px solid #7dd3fc; border-radius: 12px;">
-        <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">🤖 Gemini-analyysi</div>
-        <div id="weightAnalysisText" style="font-size: 14px; line-height: 1.6; color: #333; white-space: pre-wrap;"></div>
-      </div>
+    <div id="setupBanner" class="setup-banner">
+      <div class="setup-title">👋 Tervetuloa!</div>
+      <div class="setup-sub">Valitse käyttäjä ja syötä salasana aloittaaksesi. Nämä tallennetaan laitteelle.</div>
     </div>
 
-    <div id="status" class="status"></div>
+    <div class="card">
+      <div class="card-title">👤 Käyttäjä</div>
+      <div class="user-select">
+        <input class="us-radio" type="radio" id="uSmonde" name="globalUser" value="Smonde" />
+        <label for="uSmonde">Smonde</label>
+        <input class="us-radio" type="radio" id="uLormy"  name="globalUser" value="Lörmy" />
+        <label for="uLormy">Lörmy</label>
+      </div>
+      <div style="margin-top:8px;font-size:12px;color:#888;">Valittu käyttäjä näkyy kaikissa näkymissä</div>
+    </div>
 
-    <!-- Meme/surprise -->
-    <div id="memeWrap" class="memeWrap">
-      <div class="memeTitle">🎉 Yllätys!</div>
-      <div id="memeText"></div>
-      <img id="memeImg" alt="meme" style="display:none;" onerror="this.style.display='none'; $('memeText').textContent='(Kuva ei latautunut)'; $('memeText').style.display='block';" />
+    <div class="card">
+      <div class="card-title">🔑 Salasana</div>
+      <input id="secretInput" type="password" placeholder="Syötä salasana" />
+      <div id="secretChip" class="secret-saved-chip" style="display:none;">✓ Tallennettu</div>
+      <button class="btn btn-primary" onclick="doSaveSecret()">Tallenna salasana</button>
+      <div id="secretStatus" class="status-msg"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ℹ️ Sovellus</div>
+      <div class="setting-row">
+        <div><div class="setting-label">Versio</div><div class="setting-sub">Treenit 2026 PWA</div></div>
+        <div class="setting-value" style="color:#9aa0a6;">v2.0</div>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">GET-datan päivitys</div><div class="setting-sub">Apps Script -muutos tarvitaan</div></div>
+        <div id="getStatus" class="setting-value chip-err">✗ Ei tuettu</div>
+      </div>
     </div>
   </div>
 
-  <!-- Report card -->
-  <div id="reportCard" class="card report-section">
-    
-    <!-- Week stats -->
-    <div class="section-title">📅 Tämä viikko</div>
-    <div class="progress-wrap">
-      <div class="progress-header">
-        <span id="weekLabel" class="progress-title">Viikko</span>
-        <span id="weekNums" class="progress-nums">0 / 150 min</span>
+
+  <!-- ════════════ VIEW: KIRJAA ════════════ -->
+  <div id="view-kirjaa" class="view">
+    <div class="card">
+      <div class="card-title">🏃 Kirjaa suoritus</div>
+      <form id="workoutForm" novalidate>
+
+        <label class="field-label">Laji</label>
+        <div class="tag-select">
+          <input class="ts-radio" type="radio" id="tKuntosali"  name="tag" value="Kuntosali" />
+          <label for="tKuntosali">🏋️ Kuntosali</label>
+          <input class="ts-radio" type="radio" id="tJuoksu"     name="tag" value="Juoksu" />
+          <label for="tJuoksu">🏃 Juoksu</label>
+          <input class="ts-radio" type="radio" id="tUinti"      name="tag" value="Uinti" />
+          <label for="tUinti">🏊 Uinti</label>
+          <input class="ts-radio" type="radio" id="tKuntopiiri" name="tag" value="Kuntopiiri" />
+          <label for="tKuntopiiri">🔄 Kuntopiiri</label>
+          <input class="ts-radio" type="radio" id="tJooga"      name="tag" value="Jooga" />
+          <label for="tJooga">🧘 Jooga</label>
+          <input class="ts-radio" type="radio" id="tPyoraily"   name="tag" value="Pyöräily" />
+          <label for="tPyoraily">🚴 Pyöräily</label>
+          <input class="ts-radio" type="radio" id="tSalibandy"  name="tag" value="Salibandy" />
+          <label for="tSalibandy">🏑 Salibandy</label>
+        </div>
+
+        <label class="field-label">Päivä</label>
+        <input id="workoutDate" type="date" />
+
+        <label class="field-label">Kesto (min)</label>
+        <div id="minutesDisplay" class="big-display minutes-display">0 min</div>
+        <div class="step-grid">
+          <button type="button" class="btn-plus"  onclick="addMin(1)">+1</button>
+          <button type="button" class="btn-plus"  onclick="addMin(5)">+5</button>
+          <button type="button" class="btn-plus"  onclick="addMin(10)">+10</button>
+          <button type="button" class="btn-plus"  onclick="addMin(15)">+15</button>
+        </div>
+        <div class="step-grid" style="margin-top:6px;">
+          <button type="button" class="btn-minus" onclick="addMin(-1)">−1</button>
+          <button type="button" class="btn-minus" onclick="addMin(-5)">−5</button>
+          <button type="button" class="btn-minus" onclick="addMin(-10)">−10</button>
+          <button type="button" class="btn-minus" onclick="addMin(-15)">−15</button>
+        </div>
+        <button type="button" class="btn btn-gray" onclick="resetMin()">Nollaa kesto</button>
+
+        <label class="field-label">Huomio (valinnainen)</label>
+        <textarea id="workoutNote" placeholder="Esim. 5 km, hyvä fiilis…"></textarea>
+        <button type="submit" class="btn btn-primary">💾 Tallenna suoritus</button>
+      </form>
+
+      <div id="workoutStatus" class="status-msg"></div>
+      <div id="memeBox" class="meme-box">
+        <div style="font-size:15px;font-weight:700;">🎉 Yllätys!</div>
+        <div id="memeText" style="margin-top:6px;font-size:14px;line-height:1.45;"></div>
+        <img id="memeImg" alt="meme" style="display:none;" onerror="this.style.display='none';" />
       </div>
-      <div class="progress-bar"><div id="weekFill" class="progress-fill" style="width:0%"></div></div>
-      <div id="weekSub" class="progress-sub">0 kertaa</div>
     </div>
+  </div>
 
-    <!-- Recent 8 weeks -->
-    <div class="recent-weeks">
-      <div class="recent-weeks-title">Viimeiset 8 viikkoa</div>
-      <div id="recentBars" class="recent-bars"></div>
-    </div>
 
-    <!-- Month stats -->
-    <div style="margin-top:16px;">
-      <div class="section-title">📆 Tämä kuukausi</div>
+  <!-- ════════════ VIEW: TILASTOT — dashboard ════════════ -->
+  <div id="view-tilastot" class="view">
+
+    <!-- Viikko -->
+    <div class="card">
+      <div class="card-row">
+        <div class="card-title">📅 Tämä viikko</div>
+        <button class="refresh-btn" id="refreshBtn" onclick="refreshStats()">
+          <span class="spin-icon" id="refreshIcon">↻</span> Päivitä
+        </button>
+      </div>
       <div class="progress-wrap">
         <div class="progress-header">
-          <span id="monthLabel" class="progress-title">Kuukausi</span>
-          <span id="monthNums" class="progress-nums">0 / 600 min</span>
+          <span id="weekLabel"  class="progress-title">–</span>
+          <span id="weekNums"   class="progress-nums">– / – min</span>
         </div>
-        <div class="progress-bar"><div id="monthFill" class="progress-fill" style="width:0%"></div></div>
-        <div id="monthSub" class="progress-sub">0 kertaa</div>
+        <div class="progress-track"><div id="weekFill" class="progress-fill" style="width:0%"></div></div>
+        <div id="weekSub" class="progress-sub"></div>
+      </div>
+
+      <!-- 8-vko pylväät -->
+      <div class="card-title" style="margin-top:4px;">📊 8 viikkoa</div>
+      <div class="bars-outer" id="barsOuter">
+        <div class="bars-chart"   id="barsChart"></div>
+        <div class="bar-wk-labels" id="barsLabels"></div>
+      </div>
+      <div id="statsEmpty" class="no-data">
+        Ei dataa — tallenna suoritus tai paina&nbsp;↻
       </div>
     </div>
 
-    <!-- Weekly insight -->
-    <div id="insightSection" style="margin-top:16px; display:none;">
-      <div class="section-title">💡 Viikon palaute</div>
-      <div id="insightText" style="background:#f0f4f9; padding:12px; border-radius:10px; font-size:14px; line-height:1.5; color:#333; white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere; word-break:break-word;"></div>
+    <!-- Kuukausi -->
+    <div class="card">
+      <div class="card-title">📆 Tämä kuukausi</div>
+      <div class="progress-wrap">
+        <div class="progress-header">
+          <span id="monthLabel" class="progress-title">–</span>
+          <span id="monthNums"  class="progress-nums">– / – min</span>
+        </div>
+        <div class="progress-track"><div id="monthFill" class="progress-fill" style="width:0%"></div></div>
+        <div id="monthSub" class="progress-sub"></div>
+      </div>
     </div>
 
-    <!-- Totals -->
-    <div style="margin-top:16px;">
-      <div class="section-title">📊 Yhteensä</div>
-      <div class="totals-grid">
-        <div class="total-box">
-          <div id="totalMinutes" class="total-value">0</div>
-          <div class="total-label">minuuttia</div>
+    <!-- Yhteenvetoluvut -->
+    <div class="card">
+      <div class="card-title">📈 Yhteenveto</div>
+      <div class="stats-3">
+        <div class="stat-box">
+          <div id="summTotal"   class="stat-val">–</div>
+          <div class="stat-lbl">minuuttia yht.</div>
         </div>
-        <div class="total-box">
-          <div id="totalCount" class="total-value">0</div>
-          <div class="total-label">kertaa</div>
+        <div class="stat-box">
+          <div id="summAvg"     class="stat-val">–</div>
+          <div class="stat-lbl">min / aktiiviviikko</div>
+        </div>
+        <div class="stat-box">
+          <div id="summBest"    class="stat-val">–</div>
+          <div class="stat-lbl">paras viikko (min)</div>
         </div>
       </div>
-      <div id="perTagList" class="per-tag-list"></div>
+
+      <!-- Lajien jakauma -->
+      <div class="card-title">🏅 Lajijakauma</div>
+      <div id="distList"></div>
+      <div id="distEmpty" class="no-data" style="display:none;">Ei lajidataa</div>
     </div>
 
-    <!-- Year heatmap -->
-    <div class="year-section">
-      <div class="year-title">🗓️ Vuosi 2026 (viikot)</div>
-      <div id="yearGrid" class="year-grid"></div>
-      <div class="year-legend">
-        <div class="year-legend-item"><div class="year-legend-box l0"></div><span>0</span></div>
-        <div class="year-legend-item"><div class="year-legend-box l1"></div><span>1-30</span></div>
-        <div class="year-legend-item"><div class="year-legend-box l2"></div><span>31-60</span></div>
-        <div class="year-legend-item"><div class="year-legend-box l3"></div><span>61-120</span></div>
-        <div class="year-legend-item"><div class="year-legend-box l4"></div><span>121-180</span></div>
-        <div class="year-legend-item"><div class="year-legend-box l5"></div><span>180+</span></div>
-        <span style="margin-left:4px;">(min/vko)</span>
+    <!-- Vuosi heatmap -->
+    <div class="card">
+      <div class="card-title">🗓️ Vuosi 2026</div>
+      <div class="heatmap-scroll">
+        <div id="heatmapRow" class="heatmap-row"></div>
+      </div>
+      <div class="hm-legend">
+        <span>min/vko:</span>
+        <span class="hm-leg"><span class="hm-leg-box" style="background:#e8eaf0;"></span>0</span>
+        <span class="hm-leg"><span class="hm-leg-box" style="background:#fef3c7;"></span>1–30</span>
+        <span class="hm-leg"><span class="hm-leg-box" style="background:#fcd34d;"></span>31–60</span>
+        <span class="hm-leg"><span class="hm-leg-box" style="background:#f97316;"></span>61–120</span>
+        <span class="hm-leg"><span class="hm-leg-box" style="background:#22c55e;"></span>121–180</span>
+        <span class="hm-leg"><span class="hm-leg-box" style="background:#15803d;"></span>180+</span>
       </div>
     </div>
   </div>
 
+
+  <!-- ════════════ VIEW: PAINO ════════════ -->
+  <div id="view-paino" class="view">
+    <div class="card">
+      <div class="card-title">⚖️ Painonseuranta</div>
+      <div style="font-size:12px;color:#888;margin-bottom:10px;">Tallenna paino → saat Gemini-analyysin</div>
+      <div id="weightDisplay" class="big-display weight-display">0,00 kg</div>
+      <div class="step-grid" style="margin-bottom:6px;">
+        <button type="button" class="btn-plus"  onclick="addWgt(10)">+10 kg</button>
+        <button type="button" class="btn-plus"  onclick="addWgt(5)">+5 kg</button>
+        <button type="button" class="btn-plus"  onclick="addWgt(1)">+1 kg</button>
+        <button type="button" class="btn-plus"  onclick="addWgt(0.5)">+500 g</button>
+      </div>
+      <div class="step-grid" style="margin-bottom:6px;">
+        <button type="button" class="btn-minus" onclick="addWgt(-10)">−10 kg</button>
+        <button type="button" class="btn-minus" onclick="addWgt(-5)">−5 kg</button>
+        <button type="button" class="btn-minus" onclick="addWgt(-1)">−1 kg</button>
+        <button type="button" class="btn-minus" onclick="addWgt(-0.5)">−500 g</button>
+      </div>
+      <div class="step-grid">
+        <button type="button" class="btn-wt"  onclick="addWgt(0.1)">+100 g</button>
+        <button type="button" class="btn-wt"  onclick="addWgt(0.05)">+50 g</button>
+        <button type="button" class="btn-wtm" onclick="addWgt(-0.1)">−100 g</button>
+        <button type="button" class="btn-wtm" onclick="addWgt(-0.05)">−50 g</button>
+      </div>
+      <label class="field-label">Päivä</label>
+      <input id="weightDate" type="date" />
+      <button type="button" class="btn btn-gray"   onclick="resetWgt()">Nollaa paino</button>
+      <button type="button" class="btn btn-purple" id="saveWeightBtn">💾 Tallenna paino</button>
+      <div id="weightStatus" class="status-msg"></div>
+      <div id="weightAnalysis" class="analysis-box" style="display:none;">
+        <div style="font-size:14px;font-weight:700;margin-bottom:8px;">🤖 Gemini-analyysi</div>
+        <div id="weightAnalysisText" style="white-space:pre-wrap;"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ VIEW: PROFIILI ════════════ -->
+  <div id="view-profiili" class="view">
+
+    <!-- Päivitä-nappi + tyhjätila -->
+    <div class="card">
+      <div class="card-row">
+        <div class="card-title">👤 Profiili</div>
+        <button class="refresh-btn" id="refreshBtn2" onclick="refreshStats()">
+          <span class="spin-icon" id="refreshIcon2">↻</span> Päivitä
+        </button>
+      </div>
+      <div id="profileEmpty" class="no-data">Ei dataa — paina&nbsp;↻&nbsp;Päivitä</div>
+      <div id="profileData" style="display:none;">
+        <div class="totals-grid">
+          <div class="total-box">
+            <div id="totalMinutes" class="total-value">0</div>
+            <div class="total-label">minuuttia</div>
+          </div>
+          <div class="total-box">
+            <div id="totalCount" class="total-value">0</div>
+            <div class="total-label">kertaa</div>
+          </div>
+        </div>
+        <div class="card-title">🏅 Lajeittain</div>
+        <div id="perTagList"></div>
+      </div>
+    </div>
+
+    <!-- 🔥 Putki (streak) -->
+    <div class="card" id="streakCard" style="display:none;">
+      <div class="card-title">🔥 Aktiivisuusputki</div>
+      <div class="streak-box">
+        <div id="streakNum" class="streak-num">0</div>
+        <div id="streakLbl" class="streak-lbl">viikkoa peräkkäin</div>
+        <div id="streakSub" class="streak-sub"></div>
+      </div>
+    </div>
+
+    <!-- 🏆 Ennätykset -->
+    <div class="card" id="recordsCard" style="display:none;">
+      <div class="card-title">🏆 Ennätykset</div>
+      <div class="record-grid">
+        <div class="record-box">
+          <div class="record-icon">📅</div>
+          <div id="recBestWeek"  class="record-val">–</div>
+          <div class="record-lbl">Paras viikko (min)</div>
+        </div>
+        <div class="record-box">
+          <div class="record-icon">🏅</div>
+          <div id="recTopSport" class="record-val">–</div>
+          <div class="record-lbl">Eniten harjoiteltu laji</div>
+        </div>
+        <div class="record-box">
+          <div class="record-icon">📊</div>
+          <div id="recAvgWeek"  class="record-val">–</div>
+          <div class="record-lbl">Keskim. aktiiviviikko (min)</div>
+        </div>
+        <div class="record-box">
+          <div class="record-icon">🗓️</div>
+          <div id="recActiveWeeks" class="record-val">–</div>
+          <div class="record-lbl">Aktiivisia viikkoja 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🎯 Omat tavoitteet -->
+    <div class="card">
+      <div class="card-title">🎯 Omat tavoitteet</div>
+      <div style="font-size:12px;color:#888;margin-bottom:14px;">
+        Tallennetaan laitteelle — korvaa backendin oletusarvot progress-palkeissa.
+      </div>
+
+      <!-- Viikkotavoite -->
+      <div class="field-label" style="margin-top:0;">📅 Viikkotavoite</div>
+      <div id="goalWeekDisplay" class="goal-display goal-week-display">150 min/vko</div>
+      <div class="step-grid">
+        <button type="button" class="btn-minus" onclick="addGoal('week',-30)">−30</button>
+        <button type="button" class="btn-minus" onclick="addGoal('week',-10)">−10</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('week',10)">+10</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('week',30)">+30</button>
+      </div>
+      <div class="step-grid" style="margin-top:5px;">
+        <button type="button" class="btn-minus" onclick="addGoal('week',-5)">−5</button>
+        <button type="button" class="btn-minus" onclick="addGoal('week',-1)">−1</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('week',1)">+1</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('week',5)">+5</button>
+      </div>
+      <button type="button" class="goal-save-btn goal-save-week" onclick="saveGoalNew('week')">
+        ✓ Aseta viikkotavoite
+      </button>
+
+      <!-- Kuukausitavoite -->
+      <div class="field-label" style="margin-top:20px;">📆 Kuukausitavoite</div>
+      <div id="goalMonthDisplay" class="goal-display goal-month-display">600 min/kk</div>
+      <div class="step-grid">
+        <button type="button" class="btn-minus" onclick="addGoal('month',-100)">−100</button>
+        <button type="button" class="btn-minus" onclick="addGoal('month',-50)">−50</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('month',50)">+50</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('month',100)">+100</button>
+      </div>
+      <div class="step-grid" style="margin-top:5px;">
+        <button type="button" class="btn-minus" onclick="addGoal('month',-25)">−25</button>
+        <button type="button" class="btn-minus" onclick="addGoal('month',-10)">−10</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('month',10)">+10</button>
+        <button type="button" class="btn-plus"  onclick="addGoal('month',25)">+25</button>
+      </div>
+      <button type="button" class="goal-save-btn goal-save-month" onclick="saveGoalNew('month')">
+        ✓ Aseta kuukausitavoite
+      </button>
+
+      <div id="goalStatus" class="status-msg"></div>
+
+      <!-- Tavoitehistoria -->
+      <div class="card-title" style="margin-top:20px;margin-bottom:8px;">📋 Tavoitehistoria</div>
+      <div id="goalHistoryList">
+        <div class="no-data" style="padding:12px 0;">Ei aiempia tavoitteita</div>
+      </div>
+    </div>
+
+    <!-- 📅 Aktiivisuuskalenteri -->
+    <div class="card">
+      <div class="card-title">📅 Aktiivisuuskalenteri</div>
+      <div style="font-size:12px;color:#888;margin-bottom:10px;">
+        Vihreä = aktiivinen viikko. Päivätarkkuus vaatii backend-lisäyksen (ks. koodi).
+      </div>
+      <div class="cal-nav">
+        <button class="cal-nav-btn" onclick="calMove(-1)">‹</button>
+        <div id="calMonthLabel" class="cal-month-lbl">–</div>
+        <button class="cal-nav-btn" onclick="calMove(+1)">›</button>
+      </div>
+      <div class="cal-day-names">
+        <div class="cal-day-name">Ma</div>
+        <div class="cal-day-name">Ti</div>
+        <div class="cal-day-name">Ke</div>
+        <div class="cal-day-name">To</div>
+        <div class="cal-day-name">Pe</div>
+        <div class="cal-day-name">La</div>
+        <div class="cal-day-name">Su</div>
+      </div>
+      <div id="calGrid" class="cal-grid"></div>
+      <div class="cal-note" id="calNote">Aktiviteetit näkyvät Päivitä-napin jälkeen</div>
+      <div class="cal-legend">
+        <span class="cal-leg">
+          <span class="cal-leg-box" style="background:#22c55e;"></span>Suoritettu
+        </span>
+        <span class="cal-leg">
+          <span class="cal-leg-box" style="background:#4285f4;"></span>Tänään
+        </span>
+        <span class="cal-leg">
+          <span class="cal-leg-box" style="background:#ede9fe;outline:2px dashed #a78bfa;"></span>Suositus (paikallinen)
+        </span>
+        <span class="cal-leg" id="geminiLegend" style="display:none;">
+          <span class="cal-leg-box" style="background:#fdf4ff;outline:2px dashed #d946ef;"></span>Suositus (Gemini)
+        </span>
+      </div>
+    </div>
+
+    <!-- Viikon palaute -->
+    <div id="insightCard" class="card" style="display:none;">
+      <div class="card-title">💡 Viikon palaute</div>
+      <div id="insightText" class="insight-box"></div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ BOTTOM NAV ════════════ -->
+  <nav class="bottom-nav">
+    <button class="nav-btn" id="nav-asetukset" onclick="showView('asetukset')">
+      <span class="nav-icon">⚙️</span><span>Asetukset</span>
+    </button>
+    <button class="nav-btn" id="nav-kirjaa" onclick="showView('kirjaa')">
+      <span class="nav-icon">🏋️</span><span>Kirjaa</span>
+    </button>
+    <button class="nav-btn" id="nav-tilastot" onclick="showView('tilastot')">
+      <span class="nav-icon">📊</span><span>Tilastot</span>
+    </button>
+    <button class="nav-btn" id="nav-paino" onclick="showView('paino')">
+      <span class="nav-icon">⚖️</span><span>Paino</span>
+    </button>
+    <button class="nav-btn" id="nav-profiili" onclick="showView('profiili')">
+      <span class="nav-icon">👤</span><span>Profiili</span>
+    </button>
+  </nav>
+
+
+  <!-- ════════════ SCRIPT ════════════ -->
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzBi_b_aoB6QcdvxczEYUBHBAjiziHe3BRsECU5iu1ehBXL8ktwYN2dle7ZMqDYEdWq/exec";
+  
+  const API_URL = "https://script.google.com/macros/s/AKfycbzBi_b_aoB6QcdvxczEYUBHBAjiziHe3BRsECU5iu1ehBXL8ktwYN2dle7ZMqDYEdWq/exec";
 
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────
+  const $  = id => document.getElementById(id);
+  const gs = () => localStorage.getItem('appSecret') || '';
+  const gu = () => localStorage.getItem('appUser')   || '';
+
+  function setMsg(elId, txt, type) {
+    const el = $(elId); if (!el) return;
+    el.textContent = txt;
+    el.className   = 'status-msg' + (type ? ' ' + type : '');
+  }
+
+  // ── State ──────────────────────────────────────────────────────────
+  let mins    = 0;
+  let wgt     = 0;
+  let cached  = null;   // last json.saved
+  let calYear = new Date().getFullYear();
+  let calMon  = new Date().getMonth();   // 0-indexed
+
+  // ── Navigation ─────────────────────────────────────────────────────
+  function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    $('view-' + name).classList.add('active');
+    $('nav-'  + name).classList.add('active');
+    if (name === 'tilastot' || name === 'profiili') renderCached();
+  }
+
+  // ── Global user ─────────────────────────────────────────────────────
+  function initUser() {
+    const u = gu();
+    if (u) {
+      const r = document.querySelector(`input[name="globalUser"][value="${u}"]`);
+      if (r) r.checked = true;
     }
-
-    const $ = id => document.getElementById(id);
-    const f = $('f');
-    const statusEl = $('status');
-    const memeWrap = $('memeWrap');
-    const memeImg = $('memeImg');
-    const memeText = $('memeText');
-    const secretInput = $('secret');
-    const secretSaved = $('secretSaved');
-    const minutesDisplay = $('minutesDisplay');
-    const reportCard = $('reportCard');
-
-    let currentMinutes = 0;
-
-    function updateMinutesDisplay() {
-      minutesDisplay.textContent = currentMinutes + ' min';
-    }
-    function addMinutes(n) {
-      currentMinutes = Math.max(0, currentMinutes + n);
-      updateMinutesDisplay();
-    }
-    function resetMinutes() {
-      currentMinutes = 0;
-      updateMinutesDisplay();
-    }
-
-    function setStatus(msg, type) {
-      statusEl.textContent = msg;
-      statusEl.className = 'status' + (type ? ' ' + type : '');
-    }
-
-    function showSurprise(val) {
-      if (!val) return;
-      if (val.startsWith('http')) {
-        memeImg.src = val;
-        memeImg.style.display = 'block';
-        memeText.style.display = 'none';
-      } else {
-        memeText.textContent = val;
-        memeText.style.display = 'block';
-        memeImg.style.display = 'none';
-      }
-      memeWrap.style.display = 'block';
-    }
-    function hideSurprise() {
-      memeWrap.style.display = 'none';
-      memeImg.src = '';
-      memeImg.style.display = 'none';
-      memeText.textContent = '';
-      memeText.style.display = 'none';
-    }
-
-    function getWeekLabel(w) {
-      return w.weekKey || w.weekStart || '-';
-    }
-
-    function getMonthLabel(m) {
-      return m.monthKey || m.monthStart || '-';
-    }
-
-    function renderReport(s) {
-      // Weekly - käytä s.weekly objektia
-      const w = s.weekly || {};
-      const wMin = w.minutes ?? 0;
-      const wGoal = w.goalMinutes ?? 150;
-      const wPct = w.progressPct ?? Math.min(100, Math.round((wMin / wGoal) * 100));
-      $('weekLabel').textContent = getWeekLabel(w);
-      $('weekNums').textContent = `${wMin} / ${wGoal} min`;
-      $('weekFill').style.width = wPct + '%';
-      $('weekFill').className = 'progress-fill' + (wPct >= 100 ? ' over' : '');
-      $('weekSub').textContent = (w.count ?? 0) + ' kertaa';
-
-      // Recent weeks - käytä s.recentWeeks
-      const recentBars = $('recentBars');
-      recentBars.innerHTML = '';
-      const rw = s.recentWeeks || [];
-      const maxMin = Math.max(...rw.map(x => x.minutes || 0), 1);
-      rw.forEach(week => {
-        const wrap = document.createElement('div');
-        wrap.className = 'recent-bar-wrap';
-        
-        const bar = document.createElement('div');
-        bar.className = 'recent-bar';
-        const mins = week.minutes ?? 0;
-        const h = Math.max(2, Math.round((mins / maxMin) * 38));
-        bar.style.height = h + 'px';
-        
-        const label = document.createElement('div');
-        label.className = 'recent-bar-label';
-        label.textContent = mins;
-        
-        wrap.appendChild(bar);
-        wrap.appendChild(label);
-        recentBars.appendChild(wrap);
-      });
-
-      // Monthly - käytä s.monthly objektia
-      const m = s.monthly || {};
-      const mMin = m.minutes ?? 0;
-      const mGoal = m.goalMinutes ?? 600;
-      const mPct = m.progressPct ?? Math.min(100, Math.round((mMin / mGoal) * 100));
-      $('monthLabel').textContent = getMonthLabel(m);
-      $('monthNums').textContent = `${mMin} / ${mGoal} min`;
-      $('monthFill').style.width = mPct + '%';
-      $('monthFill').className = 'progress-fill' + (mPct >= 100 ? ' over' : '');
-      $('monthSub').textContent = (m.count ?? 0) + ' kertaa';
-
-      // Totals
-      $('totalMinutes').textContent = s.totalMinutes ?? 0;
-      $('totalCount').textContent = s.totalCount ?? 0;
-
-      // Per tag
-      const ptl = $('perTagList');
-      ptl.innerHTML = '';
-      (s.perTag || []).forEach(t => {
-        const d = document.createElement('div');
-        d.className = 'per-tag-item';
-        d.innerHTML = `<span class="per-tag-name">${t.tag}</span><span class="per-tag-stats">${t.count}× (${t.minutes} min)</span>`;
-        ptl.appendChild(d);
-      });
-
-      // Weekly insight
-      const insightSection = $('insightSection');
-      const insightText = $('insightText');
-      insightText.textContent = (s.weeklyInsight && String(s.weeklyInsight).trim()) ? s.weeklyInsight : 'Ei uutta palautetta tänään.';
-      insightSection.style.display = 'block';
-
-      // Year grid - käytä s.yearWeeks
-      const yg = $('yearGrid');
-      yg.innerHTML = '';
-      const yw = s.yearWeeks || [];
-      for (let i = 1; i <= 52; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'year-cell';
-        const wk = yw.find(x => {
-          // Tarkista weekKey tai weekNum
-          const weekNum = x.weekNum || (x.weekKey ? parseInt(x.weekKey.split('-W')[1]) : null);
-          return weekNum === i;
-        });
-        if (wk) {
-          const mins = wk.minutes || 0;
-          if (mins >= 1 && mins <= 30) cell.classList.add('l1');
-          else if (mins >= 31 && mins <= 60) cell.classList.add('l2');
-          else if (mins >= 61 && mins <= 120) cell.classList.add('l3');
-          else if (mins >= 121 && mins <= 180) cell.classList.add('l4');
-          else if (mins > 180) cell.classList.add('l5');
-        }
-        yg.appendChild(cell);
-      }
-
-      reportCard.style.display = 'block';
-    }
-
-    function loadSecret() {
-      const s = localStorage.getItem('appSecret');
-      if (s) { secretInput.value = s; secretSaved.style.display = 'block'; }
-    }
-    function saveSecret(s) {
-      localStorage.setItem('appSecret', s);
-      secretSaved.style.display = 'block';
-    }
-
-    function getSelectedUser() {
-      const el = document.querySelector('input[name="user"]:checked');
-      return el ? el.value : '';
-    }
-    function getSelectedTag() {
-      const el = document.querySelector('input[name="tag"]:checked');
-      return el ? el.value : '';
-    }
-
-    loadSecret();
-    $('date').valueAsDate = new Date();
-    $('weightDate').valueAsDate = new Date();
-
-    // Weight tracking
-    let currentWeight = 0;
-    const weightDisplay = $('weightDisplay');
-    const saveWeightBtn = $('saveWeightBtn');
-    const weightStatus = $('weightStatus');
-    const weightAnalysis = $('weightAnalysis');
-    const weightAnalysisText = $('weightAnalysisText');
-
-    function updateWeightDisplay() {
-      weightDisplay.textContent = currentWeight.toFixed(2).replace('.', ',') + ' kg';
-    }
-
-    function addWeight(amount) {
-      currentWeight = Math.max(0, currentWeight + amount);
-      currentWeight = Math.round(currentWeight * 100) / 100; // Round to 2 decimals
-      updateWeightDisplay();
-    }
-
-    function resetWeight() {
-      currentWeight = 0;
-      updateWeightDisplay();
-    }
-
-    saveWeightBtn.addEventListener('click', async () => {
-      const secret = secretInput.value.trim();
-      const user = getSelectedUser();
-      const weightDateValue = $('weightDate').value;
-
-      if (!secret) {
-        weightStatus.textContent = 'Syötä salasana ensin';
-        weightStatus.className = 'status error';
-        return;
-      }
-      if (!user) {
-        weightStatus.textContent = 'Valitse käyttäjä ensin';
-        weightStatus.className = 'status error';
-        return;
-      }
-      if (!weightDateValue) {
-        weightStatus.textContent = 'Valitse päivä';
-        weightStatus.className = 'status error';
-        return;
-      }
-      if (currentWeight < 30 || currentWeight > 300) {
-        weightStatus.textContent = 'Syötä paino (30-300 kg)';
-        weightStatus.className = 'status error';
-        return;
-      }
-
-      weightStatus.textContent = 'Tallennetaan ja analysoidaan...';
-      weightStatus.className = 'status';
-      weightAnalysis.style.display = 'none';
-
-      const payload = {
-        secret: secret,
-        action: 'saveWeight',
-        user: user,
-        weight: currentWeight,
-        date: weightDateValue
-      };
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-
-        if (!json.ok) {
-          weightStatus.textContent = 'Virhe: ' + (json.error || 'Tuntematon virhe');
-          weightStatus.className = 'status error';
-          return;
-        }
-
-        saveSecret(secret);
-        weightStatus.textContent = 'Paino tallennettu!';
-        weightStatus.className = 'status success';
-
-        if (json.analysis) {
-          weightAnalysisText.textContent = json.analysis;
-          weightAnalysis.style.display = 'block';
-        }
-
-        resetWeight();
-
-      } catch (err) {
-        weightStatus.textContent = 'Verkkovirhe: ' + err.message;
-        weightStatus.className = 'status error';
-      }
+    updateHeader();
+    updateSetupBanner();
+  }
+  function updateHeader() {
+    const u = gu();
+    $('headerBadge').textContent = u || '–';
+    $('headerSub').textContent   = u ? `Aktiivinen: ${u}` : 'Kirjaudu ensin →';
+  }
+  function updateSetupBanner() {
+    const done = gu() && gs();
+    $('setupBanner').style.display = done ? 'none' : 'block';
+  }
+  document.querySelectorAll('input[name="globalUser"]').forEach(r => {
+    r.addEventListener('change', e => {
+      localStorage.setItem('appUser', e.target.value);
+      updateHeader();
+      updateSetupBanner();
+      cached = null;
+      renderCached();
     });
+  });
 
-    f.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      hideSurprise();
-      setStatus('Tallennetaan...');
+  // ── Secret ─────────────────────────────────────────────────────────
+  function loadSecretUI() {
+    const s = gs();
+    if (s) { $('secretInput').value = s; $('secretChip').style.display = 'inline-block'; }
+  }
+  function doSaveSecret() {
+    const v = $('secretInput').value.trim();
+    if (!v) { setMsg('secretStatus', 'Syötä salasana', 'error'); return; }
+    localStorage.setItem('appSecret', v);
+    $('secretChip').style.display = 'inline-block';
+    setMsg('secretStatus', '✓ Salasana tallennettu', 'success');
+    updateSetupBanner();
+    // Jos käyttäjäkin valittu, siirry Kirjaa-näkymään
+    if (gu()) setTimeout(() => showView('kirjaa'), 600);
+  }
 
-      const payload = {
-        secret: secretInput.value.trim(),
-        user: getSelectedUser(),
-        date: $('date').value,
-        tag: getSelectedTag(),
-        note: $('note').value.trim(),
-        minutes: currentMinutes
-      };
+  // ── Goals ───────────────────────────────────────────────────────────
+  let goalWeekVal  = 150;
+  let goalMonthVal = 600;
 
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
+  function getGoal(type) {
+    const v = parseInt(localStorage.getItem('goal_' + type));
+    return isNaN(v) ? null : v;
+  }
 
-        if (!json.ok) {
-          if (json.error === 'Unauthorized') {
-            setStatus('Väärä salasana', 'error');
-            localStorage.removeItem('appSecret');
-            secretSaved.style.display = 'none';
-          } else {
-            setStatus('Virhe: ' + json.error, 'error');
+  function addGoal(type, n) {
+    if (type === 'week') {
+      goalWeekVal  = Math.max(10, goalWeekVal  + n);
+      updateGoalDisp('week');
+    } else {
+      goalMonthVal = Math.max(10, goalMonthVal + n);
+      updateGoalDisp('month');
+    }
+  }
+
+  function updateGoalDisp(type) {
+    if (type === 'week') {
+      const el = $('goalWeekDisplay');
+      el.textContent = `${goalWeekVal} min/vko`;
+      el.classList.add('bumped');
+      setTimeout(() => el.classList.remove('bumped'), 120);
+    } else {
+      const el = $('goalMonthDisplay');
+      el.textContent = `${goalMonthVal} min/kk`;
+      el.classList.add('bumped');
+      setTimeout(() => el.classList.remove('bumped'), 120);
+    }
+  }
+
+  function saveGoalNew(type) {
+    const val   = type === 'week' ? goalWeekVal : goalMonthVal;
+    const label = type === 'week' ? 'vko' : 'kk';
+    localStorage.setItem('goal_' + type, val);
+    addGoalHistory(type, val);
+    renderGoalHistory();
+    setMsg('goalStatus', `✓ Tavoite asetettu: ${val} min/${label}`, 'success');
+    if (cached) renderAll(cached);
+  }
+
+  // historia: [{type, value, ts}]
+  function addGoalHistory(type, value) {
+    const hist = getGoalHistory();
+    hist.unshift({ type, value, ts: new Date().toISOString() });
+    localStorage.setItem('goal_history', JSON.stringify(hist.slice(0, 20)));
+  }
+
+  function getGoalHistory() {
+    try { return JSON.parse(localStorage.getItem('goal_history') || '[]'); }
+    catch { return []; }
+  }
+
+  function renderGoalHistory() {
+    const el   = $('goalHistoryList'); if (!el) return;
+    const hist = getGoalHistory();
+    if (!hist.length) { el.innerHTML = '<div class="no-data" style="padding:12px 0;">Ei aiempia tavoitteita</div>'; return; }
+    const MONTHS = ['tammi','helmi','maalis','huhti','touko','kesä','heinä','elo','syys','loka','marras','joulu'];
+    el.innerHTML = hist.map(h => {
+      const d   = new Date(h.ts);
+      const dStr= `${d.getDate()}. ${MONTHS[d.getMonth()]}`;
+      const tStr= `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      const lbl = h.type === 'week' ? 'Viikko' : 'Kuukausi';
+      const sfx = h.type === 'week' ? 'min/vko' : 'min/kk';
+      return `<div class="goal-hist-item">
+        <div class="goal-hist-left">
+          <span class="goal-hist-badge ${h.type}">${lbl}</span>
+          <span class="goal-hist-val">${h.value} ${sfx}</span>
+        </div>
+        <span class="goal-hist-ts">${dStr} ${tStr}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Ei käytetä enää, säilyy backkompat-mielessä
+  function updateGoalDisplay() {}
+
+  // ── Minutes stepper ─────────────────────────────────────────────────
+  function updateMinDisp() { $('minutesDisplay').textContent = mins + ' min'; }
+  function addMin(n)  { mins = Math.max(0, mins + n); updateMinDisp(); }
+  function resetMin() { mins = 0; updateMinDisp(); }
+
+  // ── Weight stepper ───────────────────────────────────────────────────
+  function updateWgtDisp() {
+    $('weightDisplay').textContent = wgt.toFixed(2).replace('.', ',') + ' kg';
+  }
+  function addWgt(n)  { wgt = Math.round(Math.max(0, wgt + n) * 100) / 100; updateWgtDisp(); }
+  function resetWgt() { wgt = 0; updateWgtDisp(); }
+
+  // ── Render: entry ────────────────────────────────────────────────────
+  function renderCached() {
+    if (!cached) {
+      $('statsEmpty').style.display   = 'block';
+      $('profileEmpty').style.display = 'block';
+      $('profileData').style.display  = 'none';
+      $('streakCard').style.display   = 'none';
+      $('recordsCard').style.display  = 'none';
+      $('insightCard').style.display  = 'none';
+      renderHeatmap([]);
+      renderCalendar([], null, null, calcLocalRecommendations());
+      return;
+    }
+    renderAll(cached);
+  }
+
+  function renderAll(s) {
+    // ── Week ────────────────────────────────────────────────────────
+    const w    = s.weekly || {};
+    const wMin = w.minutes    ?? 0;
+    const wG   = getGoal('week') ?? (w.goalMinutes ?? 150);
+    const wPct = Math.min(100, Math.round(wMin / wG * 100));
+    $('weekLabel').textContent = w.weekKey || '–';
+    $('weekNums').textContent  = `${wMin} / ${wG} min`;
+    $('weekFill').style.width  = wPct + '%';
+    $('weekFill').className    = 'progress-fill' + (wPct >= 100 ? ' done' : wPct >= 80 ? ' over' : '');
+    $('weekSub').textContent   = `${w.count ?? 0} kertaa · ${wPct}%`;
+
+    // ── Bars ────────────────────────────────────────────────────────
+    renderBars(s.recentWeeks || [], wG, w.weekKey);
+
+    // ── Month ───────────────────────────────────────────────────────
+    const m    = s.monthly || {};
+    const mMin = m.minutes    ?? 0;
+    const mG   = getGoal('month') ?? (m.goalMinutes ?? 600);
+    const mPct = Math.min(100, Math.round(mMin / mG * 100));
+    $('monthLabel').textContent = m.monthKey || '–';
+    $('monthNums').textContent  = `${mMin} / ${mG} min`;
+    $('monthFill').style.width  = mPct + '%';
+    $('monthFill').className    = 'progress-fill' + (mPct >= 100 ? ' done' : mPct >= 80 ? ' over' : '');
+    $('monthSub').textContent   = `${m.count ?? 0} kertaa · ${mPct}%`;
+
+    // ── Heatmap ─────────────────────────────────────────────────────
+    renderHeatmap(s.yearWeeks || []);
+
+    // ── Summary + distribution ──────────────────────────────────────
+    const yw          = s.yearWeeks   || [];
+    const activeWks   = yw.filter(x => (x.minutes || 0) > 0);
+    const bestWk      = activeWks.length ? Math.max(...activeWks.map(x => x.minutes || 0)) : 0;
+    const avgWk       = activeWks.length ? Math.round(s.totalMinutes / activeWks.length) : 0;
+    $('summTotal').textContent = s.totalMinutes ?? '–';
+    $('summAvg').textContent   = activeWks.length ? avgWk : '–';
+    $('summBest').textContent  = bestWk || '–';
+    renderDist(s.perTag || [], s.totalMinutes ?? 0);
+
+    // ── Profile totals ───────────────────────────────────────────────
+    const tm = s.totalMinutes ?? 0;
+    const tc = s.totalCount   ?? 0;
+    if (tm > 0 || tc > 0) {
+      $('profileEmpty').style.display = 'none';
+      $('profileData').style.display  = 'block';
+      $('totalMinutes').textContent   = tm;
+      $('totalCount').textContent     = tc;
+      renderPerTag(s.perTag || []);
+    }
+
+    // ── Streak ──────────────────────────────────────────────────────
+    const streak = calcStreak(yw);
+    if (streak >= 0) {
+      $('streakCard').style.display = 'block';
+      $('streakNum').textContent    = streak;
+      $('streakLbl').textContent    = streak === 1 ? 'viikko peräkkäin 🔥' : 'viikkoa peräkkäin';
+      $('streakSub').textContent    = streak >= 4 ? '💪 Mahtavaa — pidä putki yllä!' :
+                                      streak >= 2 ? '👍 Hyvä tahti!' : '';
+    }
+
+    // ── Records ─────────────────────────────────────────────────────
+    if (activeWks.length > 0 && s.perTag && s.perTag.length > 0) {
+      $('recordsCard').style.display = 'block';
+      $('recBestWeek').textContent   = bestWk;
+      $('recTopSport').textContent   = s.perTag[0]?.tag ?? '–';
+      $('recAvgWeek').textContent    = avgWk;
+      $('recActiveWeeks').textContent = activeWks.length;
+    }
+
+    // ── Calendar ────────────────────────────────────────────────────
+    renderCalendar(yw, s.activeDates || null, s.recommendedDates || null, calcLocalRecommendations());
+
+    // ── Insight ─────────────────────────────────────────────────────
+    const ins = (s.weeklyInsight || '').trim();
+    if (ins) { $('insightCard').style.display = 'block'; $('insightText').textContent = ins; }
+
+    $('statsEmpty').style.display = 'none';
+  }
+
+  // ── Bar chart ──────────────────────────────────────────────────────
+  function renderBars(weeks, goalMin, currentWKey) {
+    const chart  = $('barsChart');
+    const labels = $('barsLabels');
+    const outer  = $('barsOuter');
+    chart.innerHTML = ''; labels.innerHTML = '';
+    outer.querySelectorAll('.goal-line,.goal-tag').forEach(e => e.remove());
+    if (!weeks.length) return;
+
+    const CHART_H = 80;
+    const maxMin  = Math.max(...weeks.map(x => x.minutes || 0), goalMin, 1);
+
+    // Goal dashed line
+    const goalFrac = Math.min(1, goalMin / maxMin);
+    const goalPx   = Math.round(goalFrac * CHART_H);
+    const gl = document.createElement('div');
+    gl.className = 'goal-line';
+    gl.style.bottom = (24 + goalPx) + 'px';
+    const gt = document.createElement('div');
+    gt.className = 'goal-tag';
+    gt.textContent = `🎯 ${goalMin}`;
+    gt.style.cssText = `position:absolute;right:0;bottom:${24 + goalPx}px;`;
+    outer.appendChild(gl); outer.appendChild(gt);
+
+    weeks.forEach((week, i) => {
+      const m     = week.minutes || 0;
+      const wKey  = week.weekKey || `W${week.weekNum || (i + 1)}`;
+      const wNum  = wKey.includes('-W') ? parseInt(wKey.split('-W')[1]) : (week.weekNum || i + 1);
+      const isCW  = wKey === currentWKey;
+      const h     = Math.max(3, Math.round(m / maxMin * CHART_H));
+
+      const col = document.createElement('div'); col.className = 'bar-col';
+      const bar = document.createElement('div');
+      bar.className = 'bar-body' + (isCW ? ' cw' : m < goalMin * 0.5 && m > 0 ? ' low' : '');
+      bar.style.height = h + 'px';
+
+      if (m > 0) {
+        const v = document.createElement('div'); v.className = 'bar-val'; v.textContent = m;
+        bar.appendChild(v);
+      }
+      col.appendChild(bar); chart.appendChild(col);
+
+      const lbl = document.createElement('div');
+      lbl.className   = 'bar-wk-lbl' + (isCW ? ' active' : '');
+      lbl.textContent = (i % 2 === 0 || isCW) ? `V${wNum}` : '';
+      labels.appendChild(lbl);
+    });
+  }
+
+  // ── Distribution bars ──────────────────────────────────────────────
+  const SPORT_COLORS = ['#4285f4','#34a853','#ea4335','#fbbc04','#7c3aed','#0097a7','#e91e63','#ff6d00'];
+  function renderDist(perTag, totalMin) {
+    const list  = $('distList');
+    const empty = $('distEmpty');
+    list.innerHTML = '';
+    if (!perTag.length || !totalMin) { empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    const sorted = [...perTag].sort((a, b) => (b.minutes || 0) - (a.minutes || 0));
+    sorted.forEach((t, i) => {
+      const pct  = Math.round((t.minutes / totalMin) * 100);
+      const col  = SPORT_COLORS[i % SPORT_COLORS.length];
+      const wrap = document.createElement('div'); wrap.className = 'dist-item';
+      wrap.innerHTML = `
+        <div class="dist-header">
+          <span class="dist-name">${t.tag}</span>
+          <span class="dist-vals">${t.count}× · ${t.minutes} min · ${pct}%</span>
+        </div>
+        <div class="dist-track">
+          <div class="dist-fill" style="width:${pct}%;background:${col};"></div>
+        </div>`;
+      list.appendChild(wrap);
+    });
+  }
+
+  // ── Heatmap ────────────────────────────────────────────────────────
+  function renderHeatmap(yearWeeks) {
+    const row   = $('heatmapRow'); row.innerHTML = '';
+    const now   = new Date();
+    const d1    = new Date(now.getFullYear(), 0, 1);
+    const cwNum = Math.ceil(((now - d1) / 864e5 + d1.getDay() + 1) / 7);
+
+    for (let i = 1; i <= 52; i++) {
+      const wk   = yearWeeks.find(x => {
+        const n = x.weekNum || (x.weekKey ? parseInt(x.weekKey.split('-W')[1]) : null);
+        return n === i;
+      });
+      const m    = wk ? (wk.minutes || 0) : 0;
+      const isCW = i === cwNum;
+
+      const wrap = document.createElement('div'); wrap.className = 'heatmap-col-wrap';
+      const cell = document.createElement('div'); cell.className = 'hm-cell';
+      if (isCW) cell.classList.add('cw');
+      if      (m >= 1  && m <= 30)  cell.classList.add('l1');
+      else if (m > 30  && m <= 60)  cell.classList.add('l2');
+      else if (m > 60  && m <= 120) cell.classList.add('l3');
+      else if (m > 120 && m <= 180) cell.classList.add('l4');
+      else if (m > 180)              cell.classList.add('l5');
+      cell.setAttribute('data-tip', `V${i}: ${m} min${isCW ? ' (tämä vko)' : ''}`);
+
+      const nl = document.createElement('div');
+      const showN = (i === 1 || i % 5 === 0);
+      nl.className   = 'hm-wk-num' + (showN ? ' show' : '');
+      nl.textContent = showN ? i : '';
+      wrap.appendChild(cell); wrap.appendChild(nl); row.appendChild(wrap);
+    }
+  }
+
+  // ── Per-tag list ───────────────────────────────────────────────────
+  function renderPerTag(perTag) {
+    const list = $('perTagList'); list.innerHTML = '';
+    perTag.forEach((t, i) => {
+      const d = document.createElement('div'); d.className = 'per-tag-item';
+      d.style.borderLeftColor = SPORT_COLORS[i % SPORT_COLORS.length];
+      d.innerHTML = `<span class="per-tag-name">${t.tag}</span>
+                     <span class="per-tag-stats">${t.count}× · ${t.minutes} min</span>`;
+      list.appendChild(d);
+    });
+  }
+
+  // ── Streak calc ────────────────────────────────────────────────────
+  function calcStreak(yearWeeks) {
+    if (!yearWeeks.length) return 0;
+    const now   = new Date();
+    const d1    = new Date(now.getFullYear(), 0, 1);
+    const cwNum = Math.ceil(((now - d1) / 864e5 + d1.getDay() + 1) / 7);
+    let streak  = 0;
+    for (let w = cwNum; w >= 1; w--) {
+      const wk = yearWeeks.find(x => {
+        const n = x.weekNum || (x.weekKey ? parseInt(x.weekKey.split('-W')[1]) : null);
+        return n === w;
+      });
+      if (wk && (wk.minutes || 0) > 0) streak++;
+      else break;
+    }
+    return streak;
+  }
+
+  // ── Activity Calendar ──────────────────────────────────────────────
+  function calMove(dir) {
+    calMon += dir;
+    if (calMon < 0)  { calMon = 11; calYear--; }
+    if (calMon > 11) { calMon = 0;  calYear++; }
+    const yw   = cached ? (cached.yearWeeks   || []) : [];
+    const ad   = cached ? (cached.activeDates || null) : null;
+    const rd   = cached ? (cached.recommendedDates || null) : null;
+    const lrec = calcLocalRecommendations();
+    renderCalendar(yw, ad, rd, lrec);
+  }
+
+  // Laskee paikalliset suositukset tavoitteen pohjalta (fallback ennen Geminiä)
+  function calcLocalRecommendations() {
+    const goal    = goalWeekVal;
+    const avgMin  = (cached && cached.totalCount > 0)
+      ? Math.round(cached.totalMinutes / cached.totalCount) : 45;
+    const needed  = Math.max(1, Math.min(7, Math.ceil(goal / avgMin)));
+
+    // Päiväjakauma harjoitusmäärän mukaan (0=Su, 1=Ma...)
+    const PATTERNS = [
+      [1],           // 1/vko: maanantai
+      [1, 4],        // 2/vko: ma + to
+      [1, 3, 5],     // 3/vko: ma + ke + pe
+      [1, 3, 5, 6],  // 4/vko: + la
+      [1, 2, 4, 5, 6], // 5/vko
+      [1, 2, 3, 4, 5, 6], // 6/vko
+      [0, 1, 2, 3, 4, 5, 6],
+    ];
+    const pattern = PATTERNS[Math.min(6, needed - 1)];
+    const today   = new Date(); today.setHours(0, 0, 0, 0);
+    const recs    = new Set();
+
+    for (let offset = 1; offset <= 28; offset++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + offset);
+      if (pattern.includes(d.getDay())) recs.add(d.toISOString().slice(0, 10));
+    }
+    return [...recs];
+  }
+
+  function renderCalendar(yearWeeks, activeDates, recommendedDates, localRecs) {
+    const grid  = $('calGrid');
+    const note  = $('calNote');
+    const label = $('calMonthLabel');
+    if (!grid) return;
+
+    // Näytä Gemini-legenda vain jos backend palauttaa suosituksia
+    const geminiLeg = $('geminiLegend');
+    if (geminiLeg) geminiLeg.style.display = (recommendedDates && recommendedDates.length) ? 'flex' : 'none';
+
+    const MONTHS_FI = ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kesäkuu',
+                       'Heinäkuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'];
+    label.textContent = `${MONTHS_FI[calMon]} ${calYear}`;
+    grid.innerHTML    = '';
+
+    const today    = new Date(); today.setHours(0, 0, 0, 0);
+    const todayStr = today.toISOString().slice(0, 10);
+
+    // Pura Gemini-suositukset päivämäärä-setiksi
+    const geminiSet = new Set(
+      (recommendedDates || []).map(x => (typeof x === 'string' ? x : x.date))
+    );
+    const localSet  = new Set(localRecs || []);
+
+    // Ensimmäinen päivä kuussa (Ma=0 gridissä)
+    const first    = new Date(calYear, calMon, 1);
+    const startDow = (first.getDay() + 6) % 7;
+
+    for (let i = 0; i < startDow; i++) {
+      const c = document.createElement('div'); c.className = 'cal-cell empty'; grid.appendChild(c);
+    }
+
+    const daysInMonth = new Date(calYear, calMon + 1, 0).getDate();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const pad  = n => String(n).padStart(2, '0');
+      const date = `${calYear}-${pad(calMon + 1)}-${pad(d)}`;
+      const cell = document.createElement('div'); cell.className = 'cal-cell';
+      cell.textContent = d;
+
+      if (date === todayStr) {
+        cell.classList.add('today');
+      } else if (date < todayStr) {
+        // Mennyt päivä — näytä suoritetut
+        if (activeDates) {
+          if (activeDates.includes(date)) cell.classList.add('active');
+          note.textContent = '';
+        } else {
+          const iso   = new Date(calYear, calMon, d);
+          const d1loc = new Date(iso.getFullYear(), 0, 1);
+          const wNum  = Math.ceil(((iso - d1loc) / 864e5 + d1loc.getDay() + 1) / 7);
+          const wk    = yearWeeks.find(x => {
+            const n = x.weekNum || (x.weekKey ? parseInt(x.weekKey.split('-W')[1]) : null);
+            return n === wNum;
+          });
+          if (wk && (wk.minutes || 0) > 0) {
+            cell.classList.add('active');
+            if ((wk.minutes || 0) > 120) cell.classList.add('l3');
+            else if ((wk.minutes || 0) > 60) cell.classList.add('l2');
           }
-          return;
+          if (!activeDates) note.textContent = 'Viikkotarkkuus — päivätarkkuus vaatii backend-lisäyksen';
         }
-
-        saveSecret(payload.secret);
-        
-        // Kaikki data tulee json.saved -objektista
-        const s = json.saved;
-
-        setStatus(`Tallennettu! Yhteensä: ${s.totalCount ?? 0} kertaa`, 'success');
-
-        if (s.surpriseShown && s.memeUrl) {
-          showSurprise(s.memeUrl);
+      } else {
+        // Tulevaisuus — suositukset
+        if (geminiSet.has(date)) {
+          // Gemini-suositus (violetti/magenta)
+          cell.classList.add('rec-gemini');
+          const rec = (recommendedDates || []).find(x =>
+            (typeof x === 'string' ? x : x.date) === date
+          );
+          if (rec && rec.sport) cell.title = `${rec.sport}${rec.minutes ? ' · ' + rec.minutes + ' min' : ''}`;
+        } else if (localSet.has(date)) {
+          // Paikallinen laskelma (sinipunainen)
+          cell.classList.add('rec');
         }
-
-        renderReport(s);
-
-        $('note').value = '';
-        resetMinutes();
-
-      } catch (err) {
-        setStatus('Verkkovirhe: ' + err.message, 'error');
       }
-    });
+
+      grid.appendChild(cell);
+    }
+  }
+
+  // ── Meme ───────────────────────────────────────────────────────────
+  function showMeme(val) {
+    if (!val) return;
+    const img = $('memeImg'); const txt = $('memeText');
+    if (val.startsWith('http')) { img.src = val; img.style.display = 'block'; txt.textContent = ''; }
+    else                        { txt.textContent = val; img.style.display = 'none'; }
+    $('memeBox').style.display = 'block';
+  }
+  function hideMeme() {
+    $('memeBox').style.display = 'none';
+    $('memeImg').src = ''; $('memeImg').style.display = 'none'; $('memeText').textContent = '';
+  }
+
+  // ── Workout POST ───────────────────────────────────────────────────
+  $('workoutForm').addEventListener('submit', async ev => {
+    ev.preventDefault(); hideMeme();
+    const secret = gs(), user = gu();
+    if (!secret) { setMsg('workoutStatus', '⚠️ Syötä salasana → Asetukset', 'error'); return; }
+    if (!user)   { setMsg('workoutStatus', '⚠️ Valitse käyttäjä → Asetukset', 'error'); return; }
+    const tag = (document.querySelector('input[name="tag"]:checked') || {}).value;
+    if (!tag)       { setMsg('workoutStatus', 'Valitse laji', 'error'); return; }
+    if (mins < 1)   { setMsg('workoutStatus', 'Syötä kesto (min)', 'error'); return; }
+
+    setMsg('workoutStatus', 'Tallennetaan…', 'loading');
+    try {
+      const res  = await fetch(API_URL, {
+        method: 'POST', headers: {'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ secret, user, date: $('workoutDate').value, tag, minutes: mins,
+                               note: $('workoutNote').value.trim() })
+      });
+      const json = await res.json();
+      if (!json.ok) {
+        if (json.error === 'Unauthorized') {
+          localStorage.removeItem('appSecret'); $('secretChip').style.display = 'none';
+          setMsg('workoutStatus', '🔑 Väärä salasana', 'error');
+        } else {
+          setMsg('workoutStatus', 'Virhe: ' + json.error, 'error');
+        }
+        return;
+      }
+      cached = json.saved;
+      setMsg('workoutStatus', `✓ Tallennettu! Yhteensä ${json.saved.totalCount ?? 0}×`, 'success');
+      if (json.saved.surpriseShown && json.saved.memeUrl) showMeme(json.saved.memeUrl);
+      resetMin(); $('workoutNote').value = '';
+    } catch (err) { setMsg('workoutStatus', 'Verkkovirhe: ' + err.message, 'error'); }
+  });
+
+  // ── Weight POST ────────────────────────────────────────────────────
+  $('saveWeightBtn').addEventListener('click', async () => {
+    const secret = gs(), user = gu();
+    if (!secret) { setMsg('weightStatus', '⚠️ Syötä salasana → Asetukset', 'error'); return; }
+    if (!user)   { setMsg('weightStatus', '⚠️ Valitse käyttäjä → Asetukset', 'error'); return; }
+    if (wgt < 30 || wgt > 300) { setMsg('weightStatus', 'Syötä paino (30–300 kg)', 'error'); return; }
+    setMsg('weightStatus', 'Tallennetaan ja analysoidaan…', 'loading');
+    $('weightAnalysis').style.display = 'none';
+    try {
+      const res  = await fetch(API_URL, {
+        method: 'POST', headers: {'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({ secret, action: 'saveWeight', user, weight: wgt, date: $('weightDate').value })
+      });
+      const json = await res.json();
+      if (!json.ok) { setMsg('weightStatus', 'Virhe: ' + (json.error || '?'), 'error'); return; }
+      setMsg('weightStatus', '✓ Paino tallennettu!', 'success');
+      if (json.analysis) { $('weightAnalysisText').textContent = json.analysis; $('weightAnalysis').style.display = 'block'; }
+      resetWgt();
+    } catch (err) { setMsg('weightStatus', 'Verkkovirhe: ' + err.message, 'error'); }
+  });
+
+  // ── GET refresh ────────────────────────────────────────────────────
+  async function refreshStats() {
+    const secret = gs(), user = gu();
+    if (!secret || !user) { showView('asetukset'); return; }
+
+    [$('refreshBtn'), $('refreshBtn2')].forEach(b => b && b.classList.add('spinning'));
+    try {
+      const url = new URL(API_URL);
+      url.searchParams.set('secret', secret);
+      url.searchParams.set('user',   user);
+      url.searchParams.set('action', 'getStats');
+
+      const res  = await fetch(url.toString());
+      const json = await res.json();
+      if (json.ok && json.saved) {
+        cached = json.saved;
+        renderAll(json.saved);
+        $('getStatus').textContent = '✓ Toimii'; $('getStatus').className = 'setting-value chip-ok';
+      } else {
+        $('getStatus').textContent = '✗ Ei tuettu'; $('getStatus').className = 'setting-value chip-err';
+        renderCached();
+      }
+    } catch (_) {
+      $('getStatus').textContent = '✗ Virhe'; $('getStatus').className = 'setting-value chip-err';
+      renderCached();
+    } finally {
+      [$('refreshBtn'), $('refreshBtn2')].forEach(b => b && b.classList.remove('spinning'));
+    }
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────
+  (function init() {
+    $('workoutDate').valueAsDate = new Date();
+    $('weightDate').valueAsDate  = new Date();
+    loadSecretUI();
+    initUser();
+
+    // Lataa tallennetut tavoitteet steppereihin
+    const gw = getGoal('week');
+    const gm = getGoal('month');
+    if (gw) { goalWeekVal  = gw; }
+    if (gm) { goalMonthVal = gm; }
+    updateGoalDisp('week');
+    updateGoalDisp('month');
+    renderGoalHistory();
+
+    renderCalendar([], null, null, calcLocalRecommendations());
+
+    // Etusivu: Asetukset jos ei kirjautunut, muuten Kirjaa
+    if (!gu() || !gs()) showView('asetukset');
+    else                 showView('kirjaa');
+  })();
   </script>
 </body>
 </html>
