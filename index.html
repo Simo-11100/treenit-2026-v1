@@ -867,7 +867,7 @@
   <!-- ════════════ SCRIPT ════════════ -->
   <script>
   
-  const API_URL = "https://script.google.com/macros/s/AKfycbzBi_b_aoB6QcdvxczEYUBHBAjiziHe3BRsECU5iu1ehBXL8ktwYN2dle7ZMqDYEdWq/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbw9ebEapmtenLRhRwacDyj5sRcuRrRl5g0twQSjEI4ShG6cUB120SyGAzwNA9SJtZbt/exec";
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js').catch(() => {});
@@ -1280,7 +1280,7 @@
     renderCalendar(yw, ad, rd, lrec);
   }
 
-  
+ 
   // Laskee paikalliset suositukset tavoitteen pohjalta (fallback ennen Geminiä)
   function calcLocalRecommendations() {
     const goal    = goalWeekVal;
@@ -1459,15 +1459,24 @@
     } catch (err) { setMsg('weightStatus', 'Verkkovirhe: ' + err.message, 'error'); }
   });
 
-  // ── GET refresh ────────────────────────────────────────────────────
+  // ── POST refresh ───────────────────────────────────────────────────
+  // Käyttää samaa POST-endpointia kuin muutkin kutsut → ei CORS-ongelmia.
+  //
+  // TARVITTAVA BACKEND-MUUTOS (Apps Script, doPost):
+  //   Lisää ennen muita action-tarkistuksia:
+  //
+  //   if (data.action === 'getStats') {
+  //     return jsonOut({ ok: true, saved: buildStats_(data.user) });
+  //   }
+  //
+  //   buildStats_(user) = sama rakenne kuin handleSaveActivity_():n
+  //   paluuarvo, mutta lukee Sheetistä ilman tallennusta.
+
   function setRefreshMsg(txt, type) {
-    // Näyttää viestin molemmilla sivuilla — kumpi on auki, se näkyy
     ['tilastotStatus', 'profiiliStatus'].forEach(id => setMsg(id, txt, type));
-    // Myös Asetukset-sivun indikaattori
-    const gs_ = $('getStatus');
-    if (!gs_) return;
-    if (type === 'success') { gs_.textContent = '✓ Toimii';    gs_.className = 'setting-value chip-ok';  }
-    else                    { gs_.textContent = '✗ Ei tuettu'; gs_.className = 'setting-value chip-err'; }
+    const el = $('getStatus'); if (!el) return;
+    if      (type === 'success') { el.textContent = '✓ Toimii'; el.className = 'setting-value chip-ok';  }
+    else if (type === 'error')   { el.textContent = '✗ Virhe';  el.className = 'setting-value chip-err'; }
   }
 
   async function refreshStats() {
@@ -1481,52 +1490,36 @@
     setRefreshMsg('Ladataan…', 'loading');
 
     try {
-      const url = new URL(API_URL);
-      url.searchParams.set('secret', secret);
-      url.searchParams.set('user',   user);
-      url.searchParams.set('action', 'getStats');
-
-      const res  = await fetch(url.toString());
-
-      // Apps Script saattaa palauttaa HTML-virhesivun jos doGet puuttuu
-      const ct = res.headers.get('content-type') || '';
-      if (!ct.includes('application/json')) {
-        throw new Error('no-get-support');
-      }
-
+      const res  = await fetch(API_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body:    JSON.stringify({ secret, action: 'getStats', user })
+      });
       const json = await res.json();
+
       if (json.ok && json.saved) {
         cached = json.saved;
         renderAll(json.saved);
         setRefreshMsg(`✓ Päivitetty — ${json.saved.totalCount ?? 0} suoritusta`, 'success');
         setTimeout(() => setRefreshMsg('', ''), 3000);
+      } else if (json.error === 'Unauthorized') {
+        localStorage.removeItem('appSecret');
+        setRefreshMsg('🔑 Väärä salasana — tarkista Asetuksista', 'error');
       } else {
-        // Backend vastasi JSON:lla mutta ok=false
+        // Backend ei vielä tunne 'getStats'-actionia
         if (cached) {
           renderAll(cached);
-          setRefreshMsg('ℹ️ Backend ei tue vielä GET-pyyntöä — näytetään välimuisti', 'loading');
+          setRefreshMsg('ℹ️ Lisää getStats backendiin — näytetään edellinen data', 'loading');
         } else {
-          setRefreshMsg('ℹ️ Backend ei tue vielä GET-pyyntöä — kirjaa suoritus ensin', 'loading');
+          setRefreshMsg('ℹ️ Lisää getStats backendiin (ks. koodi yllä)', 'loading');
         }
       }
     } catch (err) {
-      // Verkkovirhe tai ei-JSON-vastaus (doGet puuttuu backendistä)
-      const noSupport = err.message === 'no-get-support';
       if (cached) {
         renderAll(cached);
-        setRefreshMsg(
-          noSupport
-            ? 'ℹ️ GET-tuki puuttuu backendistä — näytetään edellinen data'
-            : `⚠️ Verkkovirhe — näytetään edellinen data`,
-          'loading'
-        );
+        setRefreshMsg(`⚠️ Verkkovirhe — näytetään edellinen data`, 'loading');
       } else {
-        setRefreshMsg(
-          noSupport
-            ? 'ℹ️ GET-tuki puuttuu backendistä — kirjaa suoritus ensin'
-            : `⚠️ Verkkovirhe: ${err.message}`,
-          noSupport ? 'loading' : 'error'
-        );
+        setRefreshMsg(`⚠️ Verkkovirhe: ${err.message}`, 'error');
       }
     } finally {
       [$('refreshBtn'), $('refreshBtn2')].forEach(b => b && b.classList.remove('spinning'));
