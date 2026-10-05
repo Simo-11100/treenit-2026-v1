@@ -440,6 +440,32 @@
     }
     .setup-title { font-size: 16px; font-weight: 700; color: #1a73e8; margin-bottom: 6px; }
     .setup-sub   { font-size: 13px; color: #666; line-height: 1.5; }
+
+    /* ── LIIKEPANKKI ─────────────────────────── */
+    .exercise-list { display: grid; gap: 12px; }
+    .exercise-card {
+      border: 1px solid #e8eaf0;
+      border-radius: 12px;
+      padding: 12px;
+      background: #fbfcff;
+    }
+    .exercise-name { font-size: 14px; font-weight: 700; color: #1f2937; margin-bottom: 4px; }
+    .exercise-target { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+    .video-wrap {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #dbe4f0;
+    }
+    .video-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
   </style>
 </head>
 <body>
@@ -548,6 +574,58 @@
         <div style="font-size:15px;font-weight:700;">🎉 Yllätys!</div>
         <div id="memeText" style="margin-top:6px;font-size:14px;line-height:1.45;"></div>
         <img id="memeImg" alt="meme" style="display:none;" onerror="this.style.display='none';" />
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ════════════ VIEW: LIIKKEET ════════════ -->
+  <div id="view-liikkeet" class="view">
+    <div class="card">
+      <div class="card-title">🎬 Yleisimmät saliliikkeet</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">
+        Klikkaa videosta toisto päälle ja tarkista tekniikka ennen sarjoja.
+      </div>
+      <div class="exercise-list">
+        <div class="exercise-card">
+          <div class="exercise-name">Kyykky (Back Squat)</div>
+          <div class="exercise-target">Kohdelihakset: reidet, pakarat, keskivartalo</div>
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/ultWZbUMPL8" title="How to Back Squat" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <div class="exercise-card">
+          <div class="exercise-name">Maastaveto (Deadlift)</div>
+          <div class="exercise-target">Kohdelihakset: takareidet, pakarat, selkä</div>
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/op9kVnSso6Q" title="How to Deadlift" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <div class="exercise-card">
+          <div class="exercise-name">Penkkipunnerrus (Bench Press)</div>
+          <div class="exercise-target">Kohdelihakset: rinta, ojentajat, etuolkapäät</div>
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/rT7DgCr-3pg" title="How to Bench Press" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <div class="exercise-card">
+          <div class="exercise-name">Pystypunnerrus (Overhead Press)</div>
+          <div class="exercise-target">Kohdelihakset: olkapäät, ojentajat, keskivartalo</div>
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/2yjwXTZQDDI" title="How to Overhead Press" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
+
+        <div class="exercise-card">
+          <div class="exercise-name">Kulmasoutu (Barbell Row)</div>
+          <div class="exercise-target">Kohdelihakset: yläselkä, leveät selkälihakset, hauikset</div>
+          <div class="video-wrap">
+            <iframe src="https://www.youtube.com/embed/vT2GjY_Umpw" title="How to Barbell Row" loading="lazy" allowfullscreen></iframe>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -851,6 +929,9 @@
     </button>
     <button class="nav-btn" id="nav-kirjaa" onclick="showView('kirjaa')">
       <span class="nav-icon">🏋️</span><span>Kirjaa</span>
+    </button>
+    <button class="nav-btn" id="nav-liikkeet" onclick="showView('liikkeet')">
+      <span class="nav-icon">🎬</span><span>Liikkeet</span>
     </button>
     <button class="nav-btn" id="nav-tilastot" onclick="showView('tilastot')">
       <span class="nav-icon">📊</span><span>Tilastot</span>
